@@ -1,4 +1,4 @@
-import asyncio
+# import asyncio
 import sys
 
 import pygame
@@ -34,7 +34,7 @@ class Flappy:
             sounds=Sounds(),
         )
 
-    async def start(self):
+    def start(self):
         while True:
             self.background = Background(self.config)
             self.floor = Floor(self.config)
@@ -43,11 +43,11 @@ class Flappy:
             self.game_over_message = GameOver(self.config)
             self.pipes = Pipes(self.config)
             self.score = Score(self.config)
-            await self.splash()
-            await self.play()
-            await self.game_over()
+            self.splash()
+            self.play()
+            self.game_over()
 
-    async def splash(self):
+    def splash(self):
         """Shows welcome splash screen animation of flappy bird"""
 
         self.player.set_mode(PlayerMode.SHM)
@@ -64,7 +64,7 @@ class Flappy:
             self.welcome_message.tick()
 
             pygame.display.update()
-            await asyncio.sleep(0)
+            # await asyncio.sleep(0)
             self.config.tick()
 
     def check_quit_event(self, event):
@@ -80,7 +80,7 @@ class Flappy:
         screen_tap = event.type == pygame.FINGERDOWN
         return m_left or space_or_up or screen_tap
 
-    async def play(self):
+    def play(self):
         self.score.reset()
         self.player.set_mode(PlayerMode.NORMAL)
 
@@ -104,10 +104,10 @@ class Flappy:
             self.player.tick()
 
             pygame.display.update()
-            await asyncio.sleep(0)
+            # await asyncio.sleep(0)
             self.config.tick()
 
-    async def game_over(self):
+    def game_over(self):
         """crashes the player down and shows gameover image"""
 
         self.player.set_mode(PlayerMode.CRASH)
@@ -130,4 +130,4 @@ class Flappy:
 
             self.config.tick()
             pygame.display.update()
-            await asyncio.sleep(0)
+            # await asyncio.sleep(0)
