@@ -3,7 +3,14 @@ from typing import List, Tuple
 
 import pygame
 
-from .constants import BACKGROUNDS, PIPES, PLAYERS
+from .constants import (
+    BACKGROUNDS_SETUP,
+    PIPES_SETUP,
+    PLAYERS_SETUP,
+    Backgrounds,
+    Pipes,
+    Players,
+)
 
 
 class Images:
@@ -12,10 +19,16 @@ class Images:
     welcome_message: pygame.Surface
     base: pygame.Surface
     background: pygame.Surface
-    player: Tuple[pygame.Surface]
-    pipe: Tuple[pygame.Surface]
+    player: Tuple[pygame.Surface, ...]
+    pipe: Tuple[pygame.Surface, ...]
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        *,
+        player: Players | None = None,
+        bg: Backgrounds | None = None,
+        pipe: Pipes | None = None,
+    ) -> None:
         self.numbers = list(
             (
                 pygame.image.load(f"assets/sprites/{num}.png").convert_alpha()
@@ -33,27 +46,34 @@ class Images:
         ).convert_alpha()
         # base (ground) sprite
         self.base = pygame.image.load("assets/sprites/base.png").convert_alpha()
-        self.randomize()
 
-    def randomize(self):
-        # select random background sprites
-        rand_bg = random.randint(0, len(BACKGROUNDS) - 1)
-        # select random player sprites
-        rand_player = random.randint(0, len(PLAYERS) - 1)
-        # select random pipe sprites
-        rand_pipe = random.randint(0, len(PIPES) - 1)
+        self.setup_backgroud(bg)
+        self.setup_player(player)
+        self.setup_pipe(pipe)
 
-        self.background = pygame.image.load(BACKGROUNDS[rand_bg]).convert()
+    def setup_backgroud(self, bg: Backgrounds | None) -> None:
+        if bg is None:
+            bg: Backgrounds = random.choice(list(BACKGROUNDS_SETUP.keys()))  # type: ignore[reportAssignmentType]
+
+        self.background = pygame.image.load(BACKGROUNDS_SETUP[bg]).convert()
+
+    def setup_player(self, player: Players | None) -> None:
+        if player is None:
+            player: Players = random.choice(tuple(PLAYERS_SETUP.keys()))  # type: ignore[reportAssignmentType]
+
         self.player = (
-            pygame.image.load(PLAYERS[rand_player][0]).convert_alpha(),
-            pygame.image.load(PLAYERS[rand_player][1]).convert_alpha(),
-            pygame.image.load(PLAYERS[rand_player][2]).convert_alpha(),
+            pygame.image.load(PLAYERS_SETUP[player][0]).convert_alpha(),
+            pygame.image.load(PLAYERS_SETUP[player][1]).convert_alpha(),
+            pygame.image.load(PLAYERS_SETUP[player][2]).convert_alpha(),
         )
+
+    def setup_pipe(self, pipe: Pipes | None) -> None:
+        if pipe is None:
+            pipe: Pipes = random.choice(tuple(PIPES_SETUP.keys()))  # type: ignore[reportAssignmentType]
+
         self.pipe = (
             pygame.transform.flip(
-                pygame.image.load(PIPES[rand_pipe]).convert_alpha(),
-                False,
-                True,
+                pygame.image.load(PIPES_SETUP[pipe]).convert_alpha(), False, True
             ),
-            pygame.image.load(PIPES[rand_pipe]).convert_alpha(),
+            pygame.image.load(PIPES_SETUP[pipe]).convert_alpha(),
         )

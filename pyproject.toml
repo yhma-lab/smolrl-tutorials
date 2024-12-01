@@ -30,3 +30,9 @@ skip-magic-trailing-comma = true
 
 [tool.ruff.lint]
 unfixable = ["F401"]
+
+[tool.pyright]
+# https://github.com/microsoft/pyright/blob/main/docs/configuration.md#main-pyright-config-options
+typeCheckingMode = "standard"
+
+reportRedeclaration = "none"

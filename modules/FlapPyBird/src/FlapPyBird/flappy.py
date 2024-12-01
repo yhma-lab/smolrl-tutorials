@@ -15,15 +15,22 @@ from .entities import (
     WelcomeMessage,
 )
 from .utils import GameConfig, Images, Sounds, Window
+from .utils.constants import Backgrounds, Players
+from .utils.constants import Pipes as PipesT
 
 
 class Flappy:
-    def __init__(self):
+    def __init__(
+        self,
+        player: Players | None = None,
+        bg: Backgrounds | None = None,
+        pipe: PipesT | None = None,
+    ):
         pygame.init()
         pygame.display.set_caption("Flappy Bird")
         window = Window(288, 512)
         screen = pygame.display.set_mode((window.width, window.height))
-        images = Images()
+        images = Images(player=player, bg=bg, pipe=pipe)
 
         self.config = GameConfig(
             screen=screen,
