@@ -4,6 +4,7 @@ from typing import List, Tuple
 import pygame
 
 from .constants import (
+    ASSETS,
     BACKGROUNDS_SETUP,
     PIPES_SETUP,
     PLAYERS_SETUP,
@@ -31,21 +32,21 @@ class Images:
     ) -> None:
         self.numbers = list(
             (
-                pygame.image.load(f"assets/sprites/{num}.png").convert_alpha()
+                pygame.image.load(ASSETS / "sprites" / f"{num}.png").convert_alpha()
                 for num in range(10)
             )
         )
 
         # game over sprite
         self.game_over = pygame.image.load(
-            "assets/sprites/gameover.png"
+            ASSETS / "sprites" / "gameover.png"
         ).convert_alpha()
         # welcome_message sprite for welcome screen
         self.welcome_message = pygame.image.load(
-            "assets/sprites/message.png"
+            ASSETS / "sprites" / "message.png"
         ).convert_alpha()
         # base (ground) sprite
-        self.base = pygame.image.load("assets/sprites/base.png").convert_alpha()
+        self.base = pygame.image.load(ASSETS / "sprites" / "base.png").convert_alpha()
 
         self.setup_backgroud(bg)
         self.setup_player(player)

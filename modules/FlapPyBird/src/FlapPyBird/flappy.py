@@ -110,6 +110,7 @@ class Flappy:
             self.score.tick()
             self.player.tick()
 
+            # image_data = pygame.surfarray.array3d(pygame.display.get_surface())
             pygame.display.update()
             # await asyncio.sleep(0)
             self.config.tick()
