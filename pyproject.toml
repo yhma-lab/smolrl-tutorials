@@ -1,0 +1,33 @@
+[project]
+name = "deep-learning-flappybird"
+authors = [{ name = "Lanqing Huang", email = "lqhuang@outlook.com" }]
+version = "0.1.0"
+description = "Play Flappy Bird by deep learning"
+requires-python = ">=3.9,<4"
+dependencies = [
+    "numpy>=2.0.2,<3",
+    "opencv-python>=4.10.0.84",
+    "pygame>=2.6.1",
+    "flappybird>=1.0.0",
+]
+
+[dependency-groups]
+dev = ["mypy>=1.13.0", "ruff>=0.8.0"]
+jax = ["jax>=0.4.30"]
+torch = ["torch>=2.5.1"]
+metal = ["jax-metal>=0.1.0"]
+
+[tool.uv.workspace]
+members = ["libs/*"]
+
+[tool.uv.sources]
+flappybird = { workspace = true }
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 79
+preview = true
+skip-magic-trailing-comma = true
+
+[tool.ruff.lint]
+unfixable = ["F401"]

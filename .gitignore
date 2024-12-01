@@ -1,0 +1,13 @@
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+.venv
+__pycache__
+.mypy_cache
+.pytest_cache
+.ruff_cache
+
+uv.lock
