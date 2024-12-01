@@ -5,10 +5,12 @@ version = "0.1.0"
 description = "Play Flappy Bird by deep learning"
 requires-python = ">=3.9,<4"
 dependencies = [
-    "numpy>=2.0.2,<3",
-    "opencv-python>=4.10.0.84",
     "pygame>=2.6.1",
     "flappybird>=1.0.0",
+    "opencv-python>=4.10.0.84",
+    "numpy>=2.0.2,<3",
+    "jax>=0.4.30",
+    "flax>=0.8.5",
 ]
 
 [dependency-groups]
@@ -19,7 +21,6 @@ dev = [
     "pip>=24.3.1",
     "build>=1.2.2.post1",
 ]
-jax = ["jax>=0.4.30"]
 metal = ["jax-metal>=0.1.0"]
 
 [tool.uv.workspace]
