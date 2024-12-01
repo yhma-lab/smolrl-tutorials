@@ -1,0 +1,20 @@
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project]
+name = "flappybird"
+authors = [{ name = "Sourabh Verma", email = "email@sourabh.dev" }]
+version = "1.0.0"
+description = "Flappy Bird in Pygame"
+requires-python = ">=3.9,<4"
+dependencies = ["pygame>=2.4.0,<3.0.0"]
+
+[project.optional-dependencies]
+dev = [
+    "pygbag == 0.7.1",
+    "black >= 22.1.0",
+    "pre-commit >= 2.18.1",
+    "flake8 >= 4.0.1",
+    "isort >= 5.10.1",
+]

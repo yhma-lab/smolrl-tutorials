@@ -18,7 +18,7 @@ torch = ["torch>=2.5.1"]
 metal = ["jax-metal>=0.1.0"]
 
 [tool.uv.workspace]
-members = ["libs/*"]
+members = ["modules/*"]
 
 [tool.uv.sources]
 flappybird = { workspace = true }

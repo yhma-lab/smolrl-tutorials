@@ -31,9 +31,7 @@ class Entity:
         self.hit_mask = get_hit_mask(image) if image else None
         self.__dict__.update(kwargs)
 
-    def update_image(
-        self, image: pygame.Surface, w: int = None, h: int = None
-    ) -> None:
+    def update_image(self, image: pygame.Surface, w: int = None, h: int = None) -> None:
         self.image = image
         self.hit_mask = get_hit_mask(image)
         self.w = w or (image.get_width() if image else 0)
@@ -54,9 +52,7 @@ class Entity:
     def collide(self, other) -> bool:
         if not self.hit_mask or not other.hit_mask:
             return self.rect.colliderect(other.rect)
-        return pixel_collision(
-            self.rect, other.rect, self.hit_mask, other.hit_mask
-        )
+        return pixel_collision(self.rect, other.rect, self.hit_mask, other.hit_mask)
 
     def tick(self) -> None:
         self.draw()

@@ -29,12 +29,7 @@ def get_hit_mask(image: pygame.Surface) -> HitMaskType:
     """returns a hit mask using an image's alpha."""
     return list(
         (
-            list(
-                (
-                    bool(image.get_at((x, y))[3])
-                    for y in range(image.get_height())
-                )
-            )
+            list((bool(image.get_at((x, y))[3]) for y in range(image.get_height())))
             for x in range(image.get_width())
         )
     )
