@@ -42,7 +42,9 @@ Enjoy!
 Create a conda virtual environment in the project directory:
 
 ```sh
-conda env create -f environment.yml
+conda create -p ./.conda-venv -c conda-forge python=3.12 numpy pygame ruff mypy jupyterlab
+# optional if not to train the model
+conda install -p ./.conda-venv -c conda-forge jax flax opencv
 ```
 
 Activate your conda virtual environment:
