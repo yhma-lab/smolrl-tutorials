@@ -2,6 +2,8 @@ import importlib.resources
 from pathlib import Path
 from typing import Literal
 
+FPS = 30
+
 ASSETS = Path(str(importlib.resources.files("FlapPyBird") / "assets"))
 
 

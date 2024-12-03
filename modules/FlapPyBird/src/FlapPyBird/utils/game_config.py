@@ -3,7 +3,7 @@ import os
 import pygame
 
 from .images import Images
-from .sounds import Sounds
+from .sounds import SilentSounds, Sounds
 from .window import Window
 
 
@@ -15,7 +15,7 @@ class GameConfig:
         fps: int,
         window: Window,
         images: Images,
-        sounds: Sounds,
+        sounds: Sounds | SilentSounds,
     ) -> None:
         self.screen = screen
         self.clock = clock

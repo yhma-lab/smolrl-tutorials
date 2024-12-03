@@ -1,9 +1,13 @@
 # import asyncio
 import sys
+from contextlib import contextmanager
+from typing import TypedDict
 
 import pygame
+from numpy.typing import NDArray
 from pygame.locals import K_ESCAPE, K_SPACE, K_UP, KEYDOWN, QUIT
 
+from .constants import FPS
 from .entities import (
     Background,
     Floor,
@@ -14,20 +18,29 @@ from .entities import (
     Score,
     WelcomeMessage,
 )
-from .utils import GameConfig, Images, Sounds, Window
+from .utils import GameConfig, Images, SilentSounds, Sounds, Window
 from .utils.constants import Backgrounds, Players
 from .utils.constants import Pipes as PipesT
+
+
+class GameState(TypedDict):
+    env: NDArray
+    action: int
+    reward: float
+    terminal: bool
 
 
 class Flappy:
     def __init__(
         self,
+        silent: bool = False,
         player: Players | None = None,
         bg: Backgrounds | None = None,
         pipe: PipesT | None = None,
     ):
         pygame.init()
         pygame.display.set_caption("Flappy Bird")
+
         window = Window(288, 512)
         screen = pygame.display.set_mode((window.width, window.height))
         images = Images(player=player, bg=bg, pipe=pipe)
@@ -35,21 +48,24 @@ class Flappy:
         self.config = GameConfig(
             screen=screen,
             clock=pygame.time.Clock(),
-            fps=30,
+            fps=FPS,
             window=window,
             images=images,
-            sounds=Sounds(),
+            sounds=Sounds() if not silent else SilentSounds(),
         )
+
+    def init_entities(self):
+        self.background = Background(self.config)
+        self.floor = Floor(self.config)
+        self.player = Player(self.config)
+        self.welcome_message = WelcomeMessage(self.config)
+        self.game_over_message = GameOver(self.config)
+        self.pipes = Pipes(self.config)
+        self.score = Score(self.config)
 
     def start(self):
         while True:
-            self.background = Background(self.config)
-            self.floor = Floor(self.config)
-            self.player = Player(self.config)
-            self.welcome_message = WelcomeMessage(self.config)
-            self.game_over_message = GameOver(self.config)
-            self.pipes = Pipes(self.config)
-            self.score = Score(self.config)
+            self.init_entities()
             self.splash()
             self.play()
             self.game_over()
