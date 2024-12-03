@@ -1,0 +1,17 @@
+{
+  "editor.renderControlCharacters": true,
+  "editor.renderWhitespace": "selection",
+  "editor.inlineSuggest.enabled": true,
+  "files.trimTrailingWhitespace": true,
+  "[python]": {
+    "editor.rulers": [79, 120],
+    // "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "notebook.lineNumbers": "on",
+  // "notebook.formatOnSave.enabled": true,
+  "notebook.defaultFormatter": "charliermarsh.ruff",
+  "ruff.organizeImports": true,
+  "ruff.nativeServer": "on",
+  "mypy-type-checker.preferDaemon": true
+}
