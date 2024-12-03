@@ -3,7 +3,7 @@ name = "deep-learning-flappybird"
 authors = [{ name = "Lanqing Huang", email = "lqhuang@outlook.com" }]
 version = "0.1.0"
 description = "Play Flappy Bird by deep learning"
-requires-python = ">=3.9,<4"
+requires-python = ">=3.10,<3.13"
 dependencies = [
     "pygame>=2.6.1",
     "flappybird>=1.0.0",
@@ -41,5 +41,4 @@ unfixable = ["F401"]
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md#main-pyright-config-options
 typeCheckingMode = "standard"
-
 reportRedeclaration = "none"

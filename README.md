@@ -4,6 +4,10 @@ An example also as tutorials for playing Flappy Bird by Deep Q-Network.
 
 <img src="./images/flappy_bird_demp.gif" width="250">
 
+## Setup
+
+Check [installation.md](./docs/installation.md) for instructions.
+
 ## Disclaimer
 
 This work is highly based on the following repos:
