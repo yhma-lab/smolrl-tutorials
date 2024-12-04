@@ -24,7 +24,7 @@ dev = [
 metal = ["jax-metal>=0.1.0"]
 
 [tool.uv.workspace]
-members = ["modules/*"]
+members = ["packages/*"]
 
 [tool.uv.sources]
 flappybird = { workspace = true }
