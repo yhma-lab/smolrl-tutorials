@@ -8,4 +8,4 @@ jupyterlab
 ruff
 mypy
 
--e ./modules/FlapPyBird
+-e ./packages/FlapPyBird

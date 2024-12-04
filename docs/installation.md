@@ -29,8 +29,18 @@ That's it!
 ```sh
 # activate the environment and run the game
 source ./.venv/bin/activate
-python3 run_game.py
 
+
+# If you're using Windows with `UnauthorizedAccess`, you can follow the instructions below:
+# https://docs.python.org/3/library/venv.html
+# 
+# ```powershell
+# Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+# ```
+.venv\Scripts\activate.ps1
+
+# run the game
+python3 run_game.py
 # or run script using `uv`
 uv run run_game.py
 ```
@@ -52,7 +62,7 @@ Activate your conda virtual environment:
 ```sh
 conda activate ./.conda-venv
 # DO NOT FORGET to install the local flappybird package
-pip install -e ./modules/flappybird
+pip install -e ./packages/flappybird
 ```
 
 Try to run the game:
