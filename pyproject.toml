@@ -1,17 +1,17 @@
 [project]
-name = "deep-learning-flappybird"
+name = "smolrl"
+description = "Play Flappy Bird by deep learning with mini RL framework."
 authors = [{ name = "Lanqing Huang", email = "lqhuang@outlook.com" }]
 version = "0.1.0"
-description = "Play Flappy Bird by deep learning"
 requires-python = ">=3.10,<3.13"
 dependencies = [
     "pygame>=2.6.1",
-    "flappybird>=1.0.0",
     "opencv-python>=4.10.0.84",
     "numpy>=2.0.2,<3",
     "jax>=0.4.30",
     "flax>=0.8.5",
-    "tqdm>=4.67.1",
+    # in-tree dependencies under `packages/`
+    "flappybird>=1.0.0",
 ]
 
 [dependency-groups]
@@ -19,13 +19,17 @@ dev = [
     "mypy>=1.13.0",
     "ruff>=0.8.0",
     "jupyterlab>=4.3.1",
-    "matplotlib>=3.10.0",
-    "ipywidgets>=8.1.5",
-    "ipympl>=0.9.6",
     "pip>=24.3.1",
     "build>=1.2.2.post1",
+    "smolrl[vis]",
 ]
+vis = ["matplotlib>=3.10.0", "ipywidgets>=8.1.5", "ipympl>=0.9.6"]
 metal = ["jax-metal>=0.1.0"]
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
 
 [tool.uv.workspace]
 members = ["packages/*"]
