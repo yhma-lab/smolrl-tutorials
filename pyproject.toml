@@ -5,13 +5,15 @@ authors = [{ name = "Lanqing Huang", email = "lqhuang@outlook.com" }]
 version = "0.1.0"
 requires-python = ">=3.10,<3.13"
 dependencies = [
+    # in-tree dependencies under `packages/`
+    "flappybird>=1.0.0",
+    # external dependencies
     "pygame>=2.6.1",
     "opencv-python>=4.10.0.84",
     "numpy>=2.0.2,<3",
     "jax>=0.4.30",
     "flax>=0.8.5",
-    # in-tree dependencies under `packages/`
-    "flappybird>=1.0.0",
+    "gymnasium[toy-text]>=1.0.0",
 ]
 
 [dependency-groups]
