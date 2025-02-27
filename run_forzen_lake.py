@@ -23,7 +23,7 @@ from smolrl.vis import plot_q_values_map, plot_states_actions_distribution
 
 console = Console()
 
-RENDER_MODE = Literal["human", "rgb_array", "ansi"]
+RENDER_MODE = Literal["human", "rgb_array"]
 RUN_MODE = Literal["player", "agent"]
 
 
