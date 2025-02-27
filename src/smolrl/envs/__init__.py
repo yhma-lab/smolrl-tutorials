@@ -1,1 +1,1 @@
-from .flappy_bird import FlappyBirdV1, register_flappy_bird
+from .flappy_bird import FlappyBirdSimpleEnv, register_flappy_bird
