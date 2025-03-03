@@ -1,5 +1,5 @@
 import random
-from typing import List
+from collections import deque
 
 from ..utils import GameConfig
 from .entity import Entity
@@ -16,16 +16,21 @@ class Pipe(Entity):
 
 
 class Pipes(Entity):
-    upper: List[Pipe]
-    lower: List[Pipe]
+    upper: deque[Pipe]
+    lower: deque[Pipe]
 
     def __init__(self, config: GameConfig) -> None:
         super().__init__(config)
         self.pipe_gap = 120
         self.top = 0
         self.bottom = self.config.window.viewport_height
-        self.upper = []
-        self.lower = []
+        self.upper = deque((), maxlen=1000)
+        self.lower = deque((), maxlen=1000)
+        self.spawn_initial_pipes()
+
+    def reset(self) -> None:
+        self.upper.clear()
+        self.lower.clear()
         self.spawn_initial_pipes()
 
     def tick(self) -> None:
@@ -56,13 +61,10 @@ class Pipes(Entity):
 
     def remove_old_pipes(self):
         # remove first pipe if its out of the screen
-        for pipe in self.upper:
-            if pipe.x < -pipe.w:
-                self.upper.remove(pipe)
-
-        for pipe in self.lower:
-            if pipe.x < -pipe.w:
-                self.lower.remove(pipe)
+        while (leftmost_pipe := self.upper[0]).x < -leftmost_pipe.w:
+            self.upper.popleft()
+        while (rightmose_pipe := self.lower[0]).x < -rightmose_pipe.w:
+            self.lower.popleft()
 
     def spawn_initial_pipes(self):
         upper_1, lower_1 = self.make_random_pipes()
@@ -81,24 +83,15 @@ class Pipes(Entity):
         """returns a randomly generated pipe"""
         # y of gap between upper and lower pipe
         base_y = self.config.window.viewport_height
+        img_upper = self.config.images.pipe[0]
+        img_lower = self.config.images.pipe[1]
 
         gap_y = random.randrange(0, int(base_y * 0.6 - self.pipe_gap))
         gap_y += int(base_y * 0.2)
-        pipe_height = self.config.images.pipe[0].get_height()
+        pipe_height = img_upper.get_height()
         pipe_x = self.config.window.width + 10
 
-        upper_pipe = Pipe(
-            self.config,
-            self.config.images.pipe[0],
-            pipe_x,
-            gap_y - pipe_height,
-        )
-
-        lower_pipe = Pipe(
-            self.config,
-            self.config.images.pipe[1],
-            pipe_x,
-            gap_y + self.pipe_gap,
-        )
+        upper_pipe = Pipe(self.config, img_upper, pipe_x, gap_y - pipe_height)
+        lower_pipe = Pipe(self.config, img_lower, pipe_x, gap_y + self.pipe_gap)
 
         return upper_pipe, lower_pipe

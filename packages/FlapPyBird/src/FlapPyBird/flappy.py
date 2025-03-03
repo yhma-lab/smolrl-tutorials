@@ -1,6 +1,5 @@
 # import asyncio
 import sys
-from contextlib import contextmanager
 from typing import TypedDict
 
 import pygame
@@ -19,8 +18,7 @@ from .entities import (
     WelcomeMessage,
 )
 from .utils import GameConfig, Images, SilentSounds, Sounds, Window
-from .utils.constants import Backgrounds, Players
-from .utils.constants import Pipes as PipesT
+from .utils.constants import BackgroundColor, PipeColor, PlayerColor
 
 
 class GameState(TypedDict):
@@ -34,9 +32,10 @@ class Flappy:
     def __init__(
         self,
         silent: bool = False,
-        player: Players | None = None,
-        bg: Backgrounds | None = None,
-        pipe: PipesT | None = None,
+        player: PlayerColor | None = None,
+        bg: BackgroundColor | None = None,
+        pipe: PipeColor | None = None,
+        fps: int = FPS,
     ):
         pygame.init()
         pygame.display.set_caption("Flappy Bird")
@@ -48,7 +47,7 @@ class Flappy:
         self.config = GameConfig(
             screen=screen,
             clock=pygame.time.Clock(),
-            fps=FPS,
+            fps=fps,
             window=window,
             images=images,
             sounds=Sounds() if not silent else SilentSounds(),
@@ -63,9 +62,15 @@ class Flappy:
         self.pipes = Pipes(self.config)
         self.score = Score(self.config)
 
+    def reset(self):
+        self.player.reset()
+        self.score.reset()
+        self.pipes.reset()
+
     def start(self):
+        self.init_entities()
         while True:
-            self.init_entities()
+            self.reset()
             self.splash()
             self.play()
             self.game_over()
@@ -92,7 +97,7 @@ class Flappy:
 
     def check_quit_event(self, event):
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
-            pygame.quit()
+            self.close()
             sys.exit()
 
     def is_tap_event(self, event):
@@ -104,7 +109,6 @@ class Flappy:
         return m_left or space_or_up or screen_tap
 
     def play(self):
-        self.score.reset()
         self.player.set_mode(PlayerMode.NORMAL)
 
         while True:
@@ -155,3 +159,7 @@ class Flappy:
             self.config.tick()
             pygame.display.update()
             # await asyncio.sleep(0)
+
+    def close(self):
+        pygame.display.quit()
+        pygame.quit()

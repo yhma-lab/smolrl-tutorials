@@ -2,13 +2,13 @@ import importlib.resources
 from pathlib import Path
 from typing import Literal
 
-FPS = 30
+from FlapPyBird.constants import FPS
 
 ASSETS = Path(str(importlib.resources.files("FlapPyBird") / "assets"))
 
 
 # list of all possible players (tuple of 3 positions of flap)
-Players = Literal["red", "blue", "yellow"]
+PlayerColor = Literal["red", "blue", "yellow"]
 PLAYERS_SETUP = {
     # red bird
     "red": (
@@ -31,7 +31,7 @@ PLAYERS_SETUP = {
 }
 
 # list of backgrounds
-Backgrounds = Literal["day", "night", "black"]
+BackgroundColor = Literal["day", "night", "black"]
 BACKGROUNDS_SETUP = {
     "day": ASSETS / "sprites" / "background-day.png",
     "night": ASSETS / "sprites" / "background-night.png",
@@ -39,7 +39,7 @@ BACKGROUNDS_SETUP = {
 }
 
 # list of pipes
-Pipes = Literal["green", "red"]
+PipeColor = Literal["green", "red"]
 PIPES_SETUP = {
     "green": ASSETS / "sprites" / "pipe-green.png",
     "red": ASSETS / "sprites" / "pipe-red.png",

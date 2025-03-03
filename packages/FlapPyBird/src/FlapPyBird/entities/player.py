@@ -21,14 +21,23 @@ class Player(Entity):
         x = int(config.window.width * 0.2)
         y = int((config.window.height - image.get_height()) / 2)
         super().__init__(config, image, x, y)
+
         self.min_y = -2 * self.h
         self.max_y = config.window.viewport_height - self.h * 0.75
-        self.img_idx = 0
         self.img_gen = cycle([0, 1, 2, 1])
+        self._post_init()
+
+    def _post_init(self) -> None:
+        self.img_idx = 0
         self.frame = 0
         self.crashed = False
         self.crash_entity = None
         self.set_mode(PlayerMode.SHM)
+
+    def reset(self) -> None:
+        self.x = int(self.config.window.width * 0.2)
+        self.y = int((self.config.window.height - self.h) / 2)
+        self._post_init()
 
     def set_mode(self, mode: PlayerMode) -> None:
         self.mode = mode

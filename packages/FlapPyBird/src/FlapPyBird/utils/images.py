@@ -8,9 +8,9 @@ from .constants import (
     BACKGROUNDS_SETUP,
     PIPES_SETUP,
     PLAYERS_SETUP,
-    Backgrounds,
-    Pipes,
-    Players,
+    BackgroundColor,
+    PipeColor,
+    PlayerColor,
 )
 
 
@@ -26,9 +26,9 @@ class Images:
     def __init__(
         self,
         *,
-        player: Players | None = None,
-        bg: Backgrounds | None = None,
-        pipe: Pipes | None = None,
+        player: PlayerColor | None = None,
+        bg: BackgroundColor | None = None,
+        pipe: PipeColor | None = None,
     ) -> None:
         self.numbers = list(
             (
@@ -52,15 +52,15 @@ class Images:
         self.setup_player(player)
         self.setup_pipe(pipe)
 
-    def setup_backgroud(self, bg: Backgrounds | None) -> None:
+    def setup_backgroud(self, bg: BackgroundColor | None) -> None:
         if bg is None:
-            bg: Backgrounds = random.choice(list(BACKGROUNDS_SETUP.keys()))  # type: ignore[reportAssignmentType]
+            bg: BackgroundColor = random.choice(list(BACKGROUNDS_SETUP.keys()))  # type: ignore[reportAssignmentType]
 
         self.background = pygame.image.load(BACKGROUNDS_SETUP[bg]).convert()
 
-    def setup_player(self, player: Players | None) -> None:
+    def setup_player(self, player: PlayerColor | None) -> None:
         if player is None:
-            player: Players = random.choice(tuple(PLAYERS_SETUP.keys()))  # type: ignore[reportAssignmentType]
+            player: PlayerColor = random.choice(tuple(PLAYERS_SETUP.keys()))  # type: ignore[reportAssignmentType]
 
         self.player = (
             pygame.image.load(PLAYERS_SETUP[player][0]).convert_alpha(),
@@ -68,9 +68,9 @@ class Images:
             pygame.image.load(PLAYERS_SETUP[player][2]).convert_alpha(),
         )
 
-    def setup_pipe(self, pipe: Pipes | None) -> None:
+    def setup_pipe(self, pipe: PipeColor | None) -> None:
         if pipe is None:
-            pipe: Pipes = random.choice(tuple(PIPES_SETUP.keys()))  # type: ignore[reportAssignmentType]
+            pipe: PipeColor = random.choice(tuple(PIPES_SETUP.keys()))  # type: ignore[reportAssignmentType]
 
         self.pipe = (
             pygame.transform.flip(

@@ -16,4 +16,6 @@ __all__ = [
     "Score",
     "Entity",
     "WelcomeMessage",
+    "GameOver",
+    "PlayerMode",
 ]
