@@ -24,8 +24,8 @@ class Pipes(Entity):
         self.pipe_gap = 120
         self.top = 0
         self.bottom = self.config.window.viewport_height
-        self.upper = deque((), maxlen=1000)
-        self.lower = deque((), maxlen=1000)
+        self.upper = deque((), maxlen=30)
+        self.lower = deque((), maxlen=30)
         self.spawn_initial_pipes()
 
     def reset(self) -> None:

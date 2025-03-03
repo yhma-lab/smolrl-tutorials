@@ -1,9 +1,8 @@
 # import asyncio
 import sys
-from typing import TypedDict
 
 import pygame
-from numpy.typing import NDArray
+from pygame.event import Event
 from pygame.locals import K_ESCAPE, K_SPACE, K_UP, KEYDOWN, QUIT
 
 from .constants import FPS
@@ -21,13 +20,6 @@ from .utils import GameConfig, Images, SilentSounds, Sounds, Window
 from .utils.constants import BackgroundColor, PipeColor, PlayerColor
 
 
-class GameState(TypedDict):
-    env: NDArray
-    action: int
-    reward: float
-    terminal: bool
-
-
 class Flappy:
     def __init__(
         self,
@@ -35,19 +27,21 @@ class Flappy:
         player: PlayerColor | None = None,
         bg: BackgroundColor | None = None,
         pipe: PipeColor | None = None,
-        fps: int = FPS,
+        screen_size: tuple[int, int] = (288, 512),
+        # fps: int = FPS,
     ):
         pygame.init()
         pygame.display.set_caption("Flappy Bird")
 
-        window = Window(288, 512)
+        window = Window(*screen_size)
         screen = pygame.display.set_mode((window.width, window.height))
         images = Images(player=player, bg=bg, pipe=pipe)
 
+        self.screen_size = screen_size
         self.config = GameConfig(
             screen=screen,
             clock=pygame.time.Clock(),
-            fps=fps,
+            fps=FPS,
             window=window,
             images=images,
             sounds=Sounds() if not silent else SilentSounds(),
@@ -91,16 +85,16 @@ class Flappy:
             self.player.tick()
             self.welcome_message.tick()
 
+            self.config.tick()
             pygame.display.update()
             # await asyncio.sleep(0)
-            self.config.tick()
 
-    def check_quit_event(self, event):
+    def check_quit_event(self, event: Event):
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
             self.close()
             sys.exit()
 
-    def is_tap_event(self, event):
+    def is_tap_event(self, event: Event):
         m_left, _, _ = pygame.mouse.get_pressed()
         space_or_up = event.type == KEYDOWN and (
             event.key == K_SPACE or event.key == K_UP
@@ -108,32 +102,38 @@ class Flappy:
         screen_tap = event.type == pygame.FINGERDOWN
         return m_left or space_or_up or screen_tap
 
+    def _tick_play(self):
+        self.background.tick()
+        self.floor.tick()
+        self.pipes.tick()
+        self.score.tick()
+        self.player.tick()
+        self.config.tick()
+
+    def is_player_collided(self) -> bool:
+        return self.player.collided(self.pipes, self.floor)
+
     def play(self):
         self.player.set_mode(PlayerMode.NORMAL)
 
         while True:
-            if self.player.collided(self.pipes, self.floor):
-                return
-
-            for i, pipe in enumerate(self.pipes.upper):
-                if self.player.crossed(pipe):
-                    self.score.add()
-
             for event in pygame.event.get():
                 self.check_quit_event(event)
                 if self.is_tap_event(event):
                     self.player.flap()
 
-            self.background.tick()
-            self.floor.tick()
-            self.pipes.tick()
-            self.score.tick()
-            self.player.tick()
+            for pipe in self.pipes.upper:
+                if self.player.crossed(pipe):
+                    self.score.add()
+
+            self._tick_play()
 
             # image_data = pygame.surfarray.array3d(pygame.display.get_surface())
             pygame.display.update()
             # await asyncio.sleep(0)
-            self.config.tick()
+
+            if self.is_player_collided():
+                return
 
     def game_over(self):
         """crashes the player down and shows gameover image"""

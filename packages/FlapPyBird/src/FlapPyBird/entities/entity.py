@@ -52,7 +52,7 @@ class Entity:
     def rect(self) -> pygame.Rect:
         return pygame.Rect(self.x, self.y, self.w, self.h)
 
-    def collide(self, other) -> bool:
+    def collide(self, other: Entity) -> bool:
         if not self.hit_mask or not other.hit_mask:
             return self.rect.colliderect(other.rect)
         return pixel_collision(self.rect, other.rect, self.hit_mask, other.hit_mask)

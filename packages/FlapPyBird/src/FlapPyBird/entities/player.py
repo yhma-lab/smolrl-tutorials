@@ -151,7 +151,7 @@ class Player(Entity):
             self.config.sounds.wing.play()
 
     def crossed(self, pipe: Pipe) -> bool:
-        return pipe.cx <= self.cx < pipe.cx - pipe.vel_x
+        return pipe.cx <= self.cx < (pipe.cx - pipe.vel_x)
 
     def collided(self, pipes: Pipes, floor: Floor) -> bool:
         """returns True if player collides with floor or pipes."""
