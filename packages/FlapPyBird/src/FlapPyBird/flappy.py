@@ -46,6 +46,7 @@ class Flappy:
             images=images,
             sounds=Sounds() if not silent else SilentSounds(),
         )
+        self.init_entities()
 
     def init_entities(self):
         self.background = Background(self.config)
@@ -62,7 +63,6 @@ class Flappy:
         self.pipes.reset()
 
     def start(self):
-        self.init_entities()
         while True:
             self.reset()
             self.splash()

@@ -1,21 +1,16 @@
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any
 
 import gymnasium as gym
 import numpy as np
-import numpy.typing as npt
 import pygame
 from FlapPyBird.constants import FPS
 from FlapPyBird.flappy import Flappy
 from FlapPyBird.utils.constants import BackgroundColor, PipeColor, PlayerColor
 from gymnasium import Env, spaces
 
-UP = 1
-NOOP = 0
-ActType = Literal[1, 0]
-ObsType = npt.NDArray[np.float64]
-RenderMode = Literal["human", "rgb_array"]
+from .common import UP, ActType, ObsType, RenderMode
 
 
 class FlappyBirdSimpleEnv(Env[ObsType, ActType]):

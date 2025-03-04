@@ -2,43 +2,31 @@
 from __future__ import annotations
 
 import time
-from enum import StrEnum
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal, NamedTuple
 
 import gymnasium as gym
 import numpy as np
-
-# import random
-# import string
 import typer
-from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 from matplotlib import pyplot as plt
 from rich.console import Console
 from tqdm import tqdm
 
 from smolrl.agents import QLearningAgent
-from smolrl.envs.frozen_lake import wait_player_input
+from smolrl.envs import PlayEnum, RenderEnum, human_play
+from smolrl.envs.frozen_lake import (
+    ACTION_LABELS,
+    FROZEN_LAKE_V1,
+    generate_random_map,
+    wait_human_input,
+)
 from smolrl.vis import plot_q_values_map, plot_states_actions_distribution
 
 console = Console()
 
-RENDER_MODE = Literal["human", "rgb_array"]
-RUN_MODE = Literal["player", "agent"]
 
-
-class RenderMode(StrEnum):
-    human = "human"
-    rgb_array = "rgb_array"
-    # ansi = "ansi"
-
-
-class RunMode(StrEnum):
-    player = "player"
-    agent = "agent"
-
-
-class Params(NamedTuple):
+@dataclass
+class Params:
     total_episodes: int  # Total episodes
     learning_rate: float  # Learning rate
     gamma: float  # Discounting rate
@@ -46,14 +34,14 @@ class Params(NamedTuple):
     map_size: int  # Number of tiles of one side of the squared environment
     is_slippery: bool  # If true the player will move in intended direction with probability of 1/3 else will move in either perpendicular direction with equal probability of 1/3 in both directions
     n_runs: int  # Number of runs
-    render_mode: RenderMode  # Render mode
+    render_mode: RenderEnum  # Render mode
     proba_frozen: float  # Probability that a tile is frozen
     savefig_folder: Path  # Root folder where plots are saved
 
 
-def run_experiments(params: Params, run_mode: RunMode = RunMode.player):
+def init_env(params: Params):
     env = gym.make(
-        "FrozenLake-v1",
+        FROZEN_LAKE_V1,
         is_slippery=params.is_slippery,
         render_mode=params.render_mode,
         desc=generate_random_map(size=params.map_size, p=params.proba_frozen),
@@ -62,10 +50,15 @@ def run_experiments(params: Params, run_mode: RunMode = RunMode.player):
     action_size = env.action_space.n
     state_size = env.observation_space.n
     console.print("Environment initialized ...")
-    console.print(f"Action size: {env.action_space.n}")
-    console.print(f"State size: {env.observation_space.n}")
+    console.print(f"Action size: {action_size}")
+    console.print(f"State size: {state_size}")
     console.print(f"Map size: {params.map_size}x{params.map_size}")
+    return env
 
+
+def run_experiments(env: gym.Env, params: Params, run_mode: PlayEnum = PlayEnum.human):
+    action_size = env.action_space.n
+    state_size = env.observation_space.n
     rewards = np.zeros((params.total_episodes, params.n_runs))
     steps = np.zeros((params.total_episodes, params.n_runs))
     episodes = np.arange(params.total_episodes)
@@ -73,19 +66,17 @@ def run_experiments(params: Params, run_mode: RunMode = RunMode.player):
     all_states = []
     all_actions = []
 
-    if run_mode == "agent":
-        agent = QLearningAgent(
-            learning_rate=params.learning_rate,
-            gamma=params.gamma,
-            epsilon=params.epsilon,
-            state_size=state_size,
-            action_size=action_size,
-        )
-        console.print("Agent initialized ...")
+    agent = QLearningAgent(
+        learning_rate=params.learning_rate,
+        gamma=params.gamma,
+        epsilon=params.epsilon,
+        state_size=state_size,
+        action_size=action_size,
+    )
+    console.print("Agent initialized ...")
 
     for run in range(params.n_runs):  # Run several times to account for stochasticity
-        if run_mode == "agent":
-            agent.reset_learner()
+        agent.reset_learner()
 
         for episode in tqdm(
             episodes, desc=f"Run {run}/{params.n_runs} - Episodes", leave=False
@@ -98,17 +89,7 @@ def run_experiments(params: Params, run_mode: RunMode = RunMode.player):
 
             # training
             while not done:
-                if run_mode == "player":
-                    action = wait_player_input()
-                else:
-                    # wait_quit()
-
-                    # action = env.action_space.sample()
-                    # time.sleep(1)
-
-                    action = agent.choose_action(
-                        action_space=env.action_space, state=state
-                    )
+                action = agent.choose_action(action_space=env.action_space, state=state)
 
                 # Log all states and actions
                 all_states.append(state)
@@ -116,21 +97,15 @@ def run_experiments(params: Params, run_mode: RunMode = RunMode.player):
 
                 # Take the action (a) and observe the outcome state(s') and reward (r)
                 new_state, reward, terminated, truncated, info = env.step(action)
-
-                if run_mode == "agent":
-                    agent.update(state, action, reward, new_state)
+                agent.update(state, action, reward, new_state)
 
                 done = terminated or truncated
-                total_rewards += reward
+                total_rewards += reward  # pyright: ignore[reportOperatorIssue]
                 step += 1
-
-                # console.print("total_rewards", total_rewards)
-                # console.print("step", step)
-                # console.print("qtable", qtables)
 
                 if done:
                     if params.render_mode == "human":
-                        if reward > 0:
+                        if reward > 0:  # pyright: ignore[reportOperatorIssue]
                             console.print(
                                 "Agent reached the goal! Restarting ...", style="green"
                             )
@@ -153,20 +128,18 @@ def run_experiments(params: Params, run_mode: RunMode = RunMode.player):
             #     f"Episode: {episode} - Total reward: {total_rewards} - Steps: {step}"
             # )
 
-        if run_mode == "agent":
-            qtables[run, :, :] = agent.get_qtable()
-
-            # console.print("Q-table", agent.get_qtable())
+        qtables[run, :, :] = agent.get_qtable()
+        # console.print("Q-table", agent.get_qtable())
 
     return rewards, steps, episodes, qtables, all_states, all_actions
 
 
 def main(
-    run_mode: RunMode = typer.Option(
-        RunMode.player, show_choices=True, help="Run mode: `player` or `agent`"
+    play_mode: PlayEnum = typer.Option(
+        PlayEnum.human, show_choices=True, help="Run mode: `human` or `agent`"
     ),
-    render_mode: RenderMode = typer.Option(  # type: ignore[assignment]
-        RenderMode.human, help="Render mode: `human`, `rgb_array` or `ansi`"
+    render_mode: RenderEnum = typer.Option(  # type: ignore[assignment]
+        RenderEnum.human, help="Render mode: `human`, `rgb_array`"
     ),
     expname: str | None = None,
 ):
@@ -183,23 +156,28 @@ def main(
         proba_frozen=0.9,
         savefig_folder=Path(f"./run/{exp_dirname}"),
     )
-    params.savefig_folder.mkdir(parents=True, exist_ok=True)
+    env = init_env(params)
 
-    rewards, steps, episodes, qtables, all_states, all_actions = run_experiments(
-        params, run_mode
-    )
+    if play_mode == PlayEnum.human:
+        if render_mode != RenderEnum.human:
+            raise ValueError(
+                "Environment must be in human render mode when `play_mode` == 'human'"
+            )
+        human_play(env, wait_human_input)
+        return
+
+    params.savefig_folder.mkdir(parents=True, exist_ok=True)
+    rewards, steps, episodes, qtables, all_states, all_actions = run_experiments(params)
 
     # Save the results in dataframes and plot them
     # res, st = postprocess(episodes, params, rewards, steps, params.map_size)
     qtable = qtables.mean(axis=0)  # Average the Q-table between runs
 
-    labels = {"LEFT": 0, "DOWN": 1, "RIGHT": 2, "UP": 3}
-
     plot_states_actions_distribution(
         states=all_states,
         actions=all_actions,
         map_size=params.map_size,
-        labels=labels,
+        labels=ACTION_LABELS,
         savefig_folder=params.savefig_folder,
         show=False,
     )
