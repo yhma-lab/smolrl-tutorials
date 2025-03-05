@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
 import gymnasium as gym
@@ -13,6 +14,17 @@ from gymnasium import Env, spaces
 from .common import UP, ActType, ObsType, RenderMode
 
 
+@dataclass(kw_only=True)
+class FlappyBirdSimpleParams:
+    pipe_gap: int = 100
+    player: PlayerColor | None = "yellow"
+    pipe: PipeColor | None = "green"
+    background: BackgroundColor | None = "day"
+    screen_size: tuple[int, int] = (288, 512)
+    normalize_obs: bool = True
+    render_mode: RenderMode = "rgb_array"
+
+
 class FlappyBirdSimpleEnv(Env[ObsType, ActType]):
     """A customizable Flappy Bird environment (that yields coords as observations) with gymnasium-like interface."""
 
@@ -20,10 +32,10 @@ class FlappyBirdSimpleEnv(Env[ObsType, ActType]):
 
     def __init__(
         self,
+        pipe_gap: int = 100,
         player: PlayerColor | None = "yellow",
         pipe: PipeColor | None = "green",
         background: BackgroundColor | None = "day",
-        pipe_gap: int = 100,
         screen_size: tuple[int, int] = (288, 512),
         normalize_obs: bool = True,
         render_mode: RenderMode = "human",

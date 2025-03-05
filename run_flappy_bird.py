@@ -20,7 +20,7 @@ from smolrl.envs import PlayEnum, RenderEnum, human_play
 from smolrl.envs.flappy_bird import (
     ACTION_LABELS,
     FLAPPY_BIRD_SIMPLE_V1,
-    FlappyBirdSimpleEnvParams,
+    FlappyBirdSimpleParams,
     wait_human_input,
 )
 from smolrl.vis import plot_q_values_map, plot_states_actions_distribution
@@ -38,7 +38,7 @@ class TraningParams:
     savefig_folder: Path  # Root folder where plots are saved
 
 
-def init_env(params: FlappyBirdSimpleEnvParams):
+def init_env(params: FlappyBirdSimpleParams):
     env = gym.make(FLAPPY_BIRD_SIMPLE_V1, **asdict(params))
     action_size = env.action_space.n
     console.print("Environment initialized ...")
@@ -125,7 +125,7 @@ def main(
     expname: str | None = None,
 ):
     exp_dirname = expname or int(time.monotonic())
-    env_params = FlappyBirdSimpleEnvParams(render_mode=render_mode.value)
+    env_params = FlappyBirdSimpleParams(render_mode=render_mode.value)
     train_params = TraningParams(
         total_episodes=2000,
         learning_rate=0.8,

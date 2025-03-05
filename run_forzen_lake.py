@@ -17,6 +17,7 @@ from smolrl.envs import PlayEnum, RenderEnum, human_play
 from smolrl.envs.frozen_lake import (
     ACTION_LABELS,
     FROZEN_LAKE_V1,
+    FrozenLakeParams,
     generate_random_map,
     wait_human_input,
 )
@@ -26,20 +27,16 @@ console = Console()
 
 
 @dataclass
-class Params:
+class TrainParams:
     total_episodes: int  # Total episodes
     learning_rate: float  # Learning rate
     gamma: float  # Discounting rate
     epsilon: float  # Exploration probability
-    map_size: int  # Number of tiles of one side of the squared environment
-    is_slippery: bool  # If true the player will move in intended direction with probability of 1/3 else will move in either perpendicular direction with equal probability of 1/3 in both directions
     n_runs: int  # Number of runs
-    render_mode: RenderEnum  # Render mode
-    proba_frozen: float  # Probability that a tile is frozen
     savefig_folder: Path  # Root folder where plots are saved
 
 
-def init_env(params: Params):
+def init_env(params: FrozenLakeParams):
     env = gym.make(
         FROZEN_LAKE_V1,
         is_slippery=params.is_slippery,
@@ -56,7 +53,7 @@ def init_env(params: Params):
     return env
 
 
-def run_experiments(env: gym.Env, params: Params, run_mode: PlayEnum = PlayEnum.human):
+def run_experiments(env: gym.Env, params: TrainParams):
     action_size = env.action_space.n
     state_size = env.observation_space.n
     rewards = np.zeros((params.total_episodes, params.n_runs))
@@ -144,19 +141,18 @@ def main(
     expname: str | None = None,
 ):
     exp_dirname = expname or int(time.monotonic())
-    params = Params(
+    env_params = FrozenLakeParams(
+        map_size=5, is_slippery=False, render_mode=render_mode.value, proba_frozen=0.9
+    )
+    train_params = TrainParams(
         total_episodes=2000,
         learning_rate=0.8,
         gamma=0.95,
         epsilon=0.1,
-        map_size=5,
-        is_slippery=False,
-        render_mode=render_mode,
         n_runs=20,
-        proba_frozen=0.9,
         savefig_folder=Path(f"./run/{exp_dirname}"),
     )
-    env = init_env(params)
+    env = init_env(env_params)
 
     if play_mode == PlayEnum.human:
         if render_mode != RenderEnum.human:
@@ -166,8 +162,10 @@ def main(
         human_play(env, wait_human_input)
         return
 
-    params.savefig_folder.mkdir(parents=True, exist_ok=True)
-    rewards, steps, episodes, qtables, all_states, all_actions = run_experiments(params)
+    train_params.savefig_folder.mkdir(parents=True, exist_ok=True)
+    rewards, steps, episodes, qtables, all_states, all_actions = run_experiments(
+        env, train_params
+    )
 
     # Save the results in dataframes and plot them
     # res, st = postprocess(episodes, params, rewards, steps, params.map_size)
@@ -176,15 +174,15 @@ def main(
     plot_states_actions_distribution(
         states=all_states,
         actions=all_actions,
-        map_size=params.map_size,
+        map_size=env_params.map_size,
         labels=ACTION_LABELS,
-        savefig_folder=params.savefig_folder,
+        savefig_folder=train_params.savefig_folder,
         show=False,
     )
     plot_q_values_map(
         qtable=qtable,
-        map_size=params.map_size,
-        savefig_folder=params.savefig_folder,
+        map_size=env_params.map_size,
+        savefig_folder=train_params.savefig_folder,
         show=False,
     )
     plt.show()

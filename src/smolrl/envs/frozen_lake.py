@@ -1,16 +1,41 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
+from typing import Literal
+
 import pygame
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 from pygame.event import Event
 from pygame.locals import K_DOWN, K_LEFT, K_RIGHT, K_UP, KEYDOWN
 
-from smolrl.envs._utils import check_quit_event
+from ._utils import check_quit_event
 
-__all__ = ["wait_human_input", "generate_random_map", "FROZEN_LAKE_V1", "ACTION_LABELS"]
+__all__ = [
+    "wait_human_input",
+    "generate_random_map",
+    "FROZEN_LAKE_V1",
+    "ACTION_LABELS",
+    "FrozenLakeParams",
+]
 
 FROZEN_LAKE_V1 = "FrozenLake-v1"
 ACTION_LABELS = {"LEFT": 0, "DOWN": 1, "RIGHT": 2, "UP": 3}
+
+
+@dataclass(kw_only=True)
+class FrozenLakeParams:
+    map_size: int
+    """Number of tiles of one side of the squared environment"""
+    is_slippery: bool
+    """
+    If true the player will move in intended direction with probability of
+    1/3 else will move in either perpendicular direction with equal
+    probability of 1/3 in both directions
+    """
+    proba_frozen: float
+    """Probability that a tile is frozen"""
+    render_mode: Literal["human", "rgb_array"]
+    "Render mode"
 
 
 def _get_action_from(event: Event) -> int | None:
