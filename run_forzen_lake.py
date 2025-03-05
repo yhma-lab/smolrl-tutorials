@@ -1,4 +1,4 @@
-# pyright: reportPossiblyUnboundVariable=false, reportAttributeAccessIssue=false
+# pyright: reportAttributeAccessIssue=false
 from __future__ import annotations
 
 import time
@@ -160,12 +160,14 @@ def main(
                 "Environment must be in human render mode when `play_mode` == 'human'"
             )
         human_play(env, wait_human_input)
+        env.close()
         return
 
     train_params.savefig_folder.mkdir(parents=True, exist_ok=True)
     rewards, steps, episodes, qtables, all_states, all_actions = run_experiments(
         env, train_params
     )
+    env.close()
 
     # Save the results in dataframes and plot them
     # res, st = postprocess(episodes, params, rewards, steps, params.map_size)

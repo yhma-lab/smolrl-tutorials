@@ -7,7 +7,7 @@ import gymnasium as gym
 import numpy as np
 import pygame
 from FlapPyBird.constants import FPS
-from FlapPyBird.flappy import Flappy
+from FlapPyBird.flappy import Flappy, PlayerMode
 from FlapPyBird.utils.constants import BackgroundColor, PipeColor, PlayerColor
 from gymnasium import Env, spaces
 
@@ -96,33 +96,31 @@ class FlappyBirdSimpleEnv(Env[ObsType, ActType]):
 
         if action == UP:
             self._game.player.flap()
-
-        obs = self._get_observation()
+        for pipe in self._game.pipes.upper:
+            if self._game.player.crossed(pipe):
+                self._game.score.add()
 
         self._game._tick_play()
-
-        alive = self._game.is_player_collided()
+        obs = self._get_observation()
+        terminated = self._game.is_player_collided()
 
         new_score = self._game.score.score
-
         if new_score > prev_score:
             reward = 10
-        elif alive:
+        elif not terminated:
             reward = 1
         else:
             reward = -50
-
-        terminated = not alive
         info = {"score": new_score}
 
         if self.render_mode == "human":
             self.render()
-
         return obs, reward, terminated, False, info
 
     def reset(self, *, seed: int | None = None, options: dict[str, Any] | None = None):
         """Resets the environment (starts a new game)."""
         self._game.reset()
+        self._game.player.set_mode(PlayerMode.NORMAL)
         return self._get_observation(), {"score": self._game.score}
 
     def render(self) -> None:

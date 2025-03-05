@@ -37,8 +37,6 @@ def human_play(
     while True:
         action = wait_human_input()
         new_state, reward, terminated, truncated, info = env.step(action)
-        env.render()
-
         done = terminated or truncated
         if done:
             env.reset()

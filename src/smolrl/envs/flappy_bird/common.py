@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, NoReturn
 
 import numpy as np
 import numpy.typing as npt
@@ -19,24 +19,22 @@ RenderMode = Literal["human", "rgb_array"]
 ACTION_LABELS: dict[str, ActType] = {"UP": UP, "NOOP": NOOP}
 
 
-def get_action_from(event: Event) -> ActType:
+def _get_action_from(event: Event) -> ActType:
     if event.type == FINGERDOWN:
         return UP
-
-    if event.type != KEYDOWN or event.type != MOUSEBUTTONDOWN:
-        return NOOP
-
-    m_left, _, _ = pygame.mouse.get_pressed()
-    if m_left or event.key == K_SPACE or event.key == K_UP:
+    elif event.type == KEYDOWN and (event.key == K_SPACE or event.key == K_UP):
         return UP
+    elif event.type == MOUSEBUTTONDOWN:
+        m_left, _, _ = pygame.mouse.get_pressed()
+        return UP if m_left else NOOP
     else:
         return NOOP
 
 
-def wait_human_input() -> int:
-    while True:
-        for event in pygame.event.get():
-            check_quit_event(event)
-            action = get_action_from(event)
-            if action is not None:
-                return action
+def wait_human_input() -> ActType:
+    action = NOOP
+    for event in pygame.event.get():
+        check_quit_event(event)
+        action = _get_action_from(event)
+        break
+    return action

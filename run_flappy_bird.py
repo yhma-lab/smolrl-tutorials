@@ -1,4 +1,4 @@
-# pyright: reportPossiblyUnboundVariable=false, reportAttributeAccessIssue=false
+# pyright: reportAttributeAccessIssue=false
 from __future__ import annotations
 
 import time
@@ -23,7 +23,6 @@ from smolrl.envs.flappy_bird import (
     FlappyBirdSimpleParams,
     wait_human_input,
 )
-from smolrl.vis import plot_q_values_map, plot_states_actions_distribution
 
 console = Console()
 
@@ -125,7 +124,7 @@ def main(
     expname: str | None = None,
 ):
     exp_dirname = expname or int(time.monotonic())
-    env_params = FlappyBirdSimpleParams(render_mode=render_mode.value)
+    env_params = FlappyBirdSimpleParams(render_mode=render_mode.value, pipe_gap=300)
     train_params = TraningParams(
         total_episodes=2000,
         learning_rate=0.8,
@@ -139,10 +138,13 @@ def main(
 
     if play_mode == PlayEnum.human:
         human_play(env, wait_human_input)
+        env.close()
+        return
 
     rewards, steps, episodes, qtables, all_states, all_actions = run_experiments(
         env, train_params
     )
+    env.close()
     train_params.savefig_folder.mkdir(parents=True, exist_ok=True)
 
 
