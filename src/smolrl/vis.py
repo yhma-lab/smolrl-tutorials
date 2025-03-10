@@ -26,13 +26,23 @@ def qtable_directions_map(qtable, map_size):
     return qtable_val_max, qtable_directions
 
 
-def calc_stats(
+def calc_std_bounds(
     data: npt.NDArray[np.float64], nsigma: int = 3
 ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Calculate the mean and standard deviation boundary of the data."""
-    mean = data.mean(axis=1)
-    stdvar = data.var(axis=1)
+    mean = data.mean(axis=0)
+    stdvar = data.std(axis=0, ddof=1)
     return mean, mean - nsigma * stdvar, mean + nsigma * stdvar
+
+
+def calc_minmax_bounds(
+    data: npt.NDArray[np.float64], nsigma: int = 3
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Calculate the mean and standard deviation boundary of the data."""
+    mean = data.mean(axis=0)
+    lower = data.min(axis=0)
+    upper = data.max(axis=0)
+    return mean, lower, upper
 
 
 def plot_q_table_map(
@@ -74,6 +84,7 @@ def plot_q_table_map(
 
 
 def plot_steps_and_rewards(
+    episodes: npt.NDArray[np.int64],
     rewards: npt.NDArray[np.float64],
     steps: npt.NDArray[np.float64],
     savefig_folder: Path | None = None,
@@ -82,21 +93,19 @@ def plot_steps_and_rewards(
     """Plot the steps and rewards from dataframes."""
     fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(12, 6))
 
-    episodes = np.arange(rewards.shape[0])
-
-    s_mean, s_lb, s_ub = calc_stats(steps)
+    s_mean, s_lb, s_ub = calc_minmax_bounds(steps)
     axes[0].plot(episodes, s_mean, label="Mean steps")
     axes[0].fill_between(
         episodes, s_lb, s_ub, alpha=0.6, label=r"confidence interval: 3$\sigma$"
     )
     axes[0].set(ylabel="Averaged steps number per Run")
 
-    r_mean, r_lb, r_ub = calc_stats(rewards.cumsum(axis=0))
+    r_mean, r_lb, r_ub = calc_minmax_bounds(rewards.cumsum(axis=0))
     axes[1].plot(episodes, r_mean, label="Cumulated rewards")
     axes[1].fill_between(
         episodes, r_lb, r_ub, alpha=0.6, label=r"confidence interval: 3$\sigma$"
     )
-    axes[1].set(ylabel="Cumulated rewards per Run")
+    axes[1].set(ylabel="Cumulated rewards per Run", xlabel="Episodes")
 
     fig.tight_layout()
     if savefig_folder:

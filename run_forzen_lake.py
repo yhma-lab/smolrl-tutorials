@@ -1,4 +1,4 @@
-# pyright: reportAttributeAccessIssue=false
+# pyright: reportAttributeAccessIssue=false, reportPossiblyUnboundVariable=false
 # mypy: disable-error-code="attr-defined"
 from __future__ import annotations
 
@@ -78,8 +78,31 @@ def run_experiments(env: gym.Env, params: TrainParams, vis: bool = False):
     )
     console.print("Agent initialized ...")
 
-    # if vis:
-    #     fig, axes = plt.subplots(2, 1, figsize=(12, 6))
+    if render_mode == "rgb_array" and vis:
+        fig_frame, ax = plt.subplots()
+        ax.axis("off")
+        ax.set_title("Sampled frame of Game")
+        env.reset()
+        frame = ax.imshow(env.render(), animated=True)  # type: ignore
+        fig_frame.tight_layout()
+
+        fig, axes = plt.subplots(2, 1, figsize=(12, 6))
+
+        axes[0].set_xlabel("Episodes")
+        axes[0].set_ylabel("Steps")
+        axes[0].set_title("Steps")
+        axes[0].set_xlim(0, params.total_episodes)
+        (ln_s,) = axes[0].plot(episodes, steps[0, :])
+
+        axes[1].set_xlabel("Episodes")
+        axes[1].set_ylabel("Cum Rewards")
+        axes[1].set_title("Cum Rewards")
+        axes[1].set_xlim(0, params.total_episodes)
+        (ln_cr,) = axes[1].plot(episodes, rewards[0, :].cumsum())
+
+        fig.tight_layout()
+        plt.show(block=False)
+        plt.pause(0.1)
 
     for run in range(params.n_runs):  # Run several times to account for stochasticity
         console.print(f"Start to run {run + 1}/{params.n_runs}...")
@@ -87,7 +110,7 @@ def run_experiments(env: gym.Env, params: TrainParams, vis: bool = False):
 
         tic = time.monotonic()
         for episode in tqdm(
-            episodes, desc=f"Run {run}/{params.n_runs} - Episodes", leave=False
+            episodes, desc=f"Run {run + 1}/{params.n_runs} - Episodes", leave=False
         ):
             # init
             state = env.reset()[0]
@@ -111,6 +134,13 @@ def run_experiments(env: gym.Env, params: TrainParams, vis: bool = False):
                 total_rewards += reward  # type: ignore
                 step += 1
 
+                if (
+                    render_mode == "rgb_array"
+                    and vis
+                    and episode != 0
+                    and episode % 10 == 0
+                ):
+                    episode_frame_before_done = env.render()
                 if done:
                     if render_mode == "human":
                         if reward > 0:  # pyright: ignore[reportOperatorIssue]
@@ -126,6 +156,28 @@ def run_experiments(env: gym.Env, params: TrainParams, vis: bool = False):
 
             rewards[run, episode] = total_rewards
             steps[run, episode] = step
+
+            if (
+                render_mode == "rgb_array"
+                and vis
+                and episode != 0
+                and episode % 10 == 0
+            ):
+                es = episodes[:episode]
+                ln_s.set_data(es, steps[run, :episode])
+                ln_cr.set_data(es, rewards[run, :episode].cumsum())
+
+                axes[0].set_ylim(0, int(steps[run, :episode].max() * 1.2))
+                axes[1].set_ylim(
+                    0, int((rewards[run, :episode].cumsum().max() + 2) * 1.2)
+                )
+
+                fig.canvas.draw()
+                fig.canvas.flush_events()
+
+                frame.set_data(episode_frame_before_done)  # type: ignore
+                fig_frame.canvas.draw()
+                fig_frame.canvas.flush_events()
 
         toc = time.monotonic()
         qtables[run, :, :] = agent.learner.get_q_func()
@@ -148,16 +200,16 @@ def main(
     render_mode: RenderEnum = typer.Option(  # type: ignore[assignment]
         RenderEnum.human, help="Render mode: `human`, `rgb_array`"
     ),
-    vis: bool = typer.Option(True, help="Visualize the training process"),
+    vis: bool = typer.Option(False, help="Visualize the training process"),
     expname: str | None = None,
 ):
     exp_dirname = expname or int(time.monotonic())
     env_params = FrozenLakeParams(
-        map_size=5,
+        map_size=11,
         is_slippery=False,
-        proba_frozen=0.85,
+        proba_frozen=0.9,
         render_mode=render_mode.value,
-        seed=123,
+        seed=42,
     )
     train_params = TrainParams(
         total_episodes=2000,
@@ -191,6 +243,7 @@ def main(
 
     # train_params.savefig_folder.mkdir(parents=True, exist_ok=True)
     plot_steps_and_rewards(
+        episodes=episodes,
         rewards=rewards,
         steps=steps,
         # savefig_folder=train_params.savefig_folder,
