@@ -18,10 +18,12 @@ __all__ = [
     "RenderEnum",
     "PlayEnum",
     "human_play",
+    "RenderMode",
+    "PlayMode",
 ]
 
-RENDER_MODE = Literal["human", "rgb_array"]
-PLAY_MODE = Literal["human", "agent"]
+RenderMode = Literal["human", "rgb_array"]
+PlayMode = Literal["human", "agent"]
 
 
 class RenderEnum(StrEnum):

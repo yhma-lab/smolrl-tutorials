@@ -4,27 +4,9 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import numpy.typing as npt
 import seaborn as sns
-
-sns.set_theme()
-
-
-def postprocess(episodes, params, rewards, steps, map_size):
-    """Convert the results of the simulation in dataframes."""
-    res = pd.DataFrame(
-        data={
-            "Episodes": np.tile(episodes, reps=params.n_runs),
-            "Rewards": rewards.flatten(order="F"),
-            "Steps": steps.flatten(order="F"),
-        }
-    )
-    res["cum_rewards"] = rewards.cumsum(axis=0).flatten(order="F")
-    res["map_size"] = np.repeat(f"{map_size}x{map_size}", res.shape[0])
-
-    st = pd.DataFrame(data={"Episodes": episodes, "Steps": steps.mean(axis=1)})
-    st["map_size"] = np.repeat(f"{map_size}x{map_size}", st.shape[0])
-    return res, st
+from matplotlib.figure import Figure
 
 
 def qtable_directions_map(qtable, map_size):
@@ -44,18 +26,33 @@ def qtable_directions_map(qtable, map_size):
     return qtable_val_max, qtable_directions
 
 
-def plot_q_values_map(qtable, map_size, savefig_folder: Path, show: bool = True):
+def calc_stats(
+    data: npt.NDArray[np.float64], nsigma: int = 3
+) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    """Calculate the mean and standard deviation boundary of the data."""
+    mean = data.mean(axis=1)
+    stdvar = data.var(axis=1)
+    return mean, mean - nsigma * stdvar, mean + nsigma * stdvar
+
+
+def plot_q_table_map(
+    last_frame, qtable, map_size, savefig_folder: Path | None = None, show: bool = True
+) -> Figure:
     """Plot the last frame of the simulation and the policy learned."""
     qtable_val_max, qtable_directions = qtable_directions_map(qtable, map_size)
 
-    # Plot the last frame
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(12, 4))
+
+    axes[0].imshow(last_frame)
+    axes[0].axis("off")
+    axes[0].set_title("Last frame of Game")
+
     # Plot the policy
     sns.heatmap(
         qtable_val_max,
         annot=qtable_directions,
         fmt="",
-        ax=ax,
+        ax=axes[1],
         cmap=sns.color_palette("Blues", as_cmap=True),
         linewidths=0.7,
         linecolor="black",
@@ -63,57 +60,48 @@ def plot_q_values_map(qtable, map_size, savefig_folder: Path, show: bool = True)
         yticklabels=[],
         annot_kws={"fontsize": "xx-large"},
     ).set(title="Learned Q-values\nArrows represent best action")
-    for _, spine in ax.spines.items():
+    for _, spine in axes[1].spines.items():
         spine.set_visible(True)
         spine.set_linewidth(0.7)
         spine.set_color("black")
-    img_title = f"frozenlake_q_values_{map_size}x{map_size}.png"
-    fig.savefig(savefig_folder / img_title, bbox_inches="tight")
+
+    if savefig_folder:
+        img_title = f"frozenlake_q_values_{map_size}x{map_size}.png"
+        fig.savefig(savefig_folder / img_title, bbox_inches="tight")
     if show:
         plt.show()
-
-
-def plot_states_actions_distribution(
-    states,
-    actions,
-    map_size,
-    labels: dict[str, int],
-    savefig_folder: Path,
-    show: bool = True,
-):
-    """Plot the distributions of states and actions."""
-    # labels = {"LEFT": 0, "DOWN": 1, "RIGHT": 2, "UP": 3}
-
-    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(15, 5))
-    sns.histplot(data=states, ax=ax[0], kde=True)
-    ax[0].set_title("States")
-    sns.histplot(data=actions, ax=ax[1])
-    ax[1].set_xticks(list(labels.values()), labels=labels.keys())
-    ax[1].set_title("Actions")
-    fig.tight_layout()
-    img_title = f"frozenlake_states_actions_distrib_{map_size}x{map_size}.png"
-    fig.savefig(savefig_folder / img_title, bbox_inches="tight")
-    if show:
-        plt.show()
+    return fig
 
 
 def plot_steps_and_rewards(
-    rewards_df, steps_df, savefig_folder: Path, show: bool = True
+    rewards: npt.NDArray[np.float64],
+    steps: npt.NDArray[np.float64],
+    savefig_folder: Path | None = None,
+    show: bool = True,
 ):
     """Plot the steps and rewards from dataframes."""
-    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(15, 5))
-    sns.lineplot(
-        data=rewards_df, x="Episodes", y="cum_rewards", hue="map_size", ax=ax[0]
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(12, 6))
+
+    episodes = np.arange(rewards.shape[0])
+
+    s_mean, s_lb, s_ub = calc_stats(steps)
+    axes[0].plot(episodes, s_mean, label="Mean steps")
+    axes[0].fill_between(
+        episodes, s_lb, s_ub, alpha=0.6, label=r"confidence interval: 3$\sigma$"
     )
-    ax[0].set(ylabel="Cumulated rewards")
+    axes[0].set(ylabel="Averaged steps number per Run")
 
-    sns.lineplot(data=steps_df, x="Episodes", y="Steps", hue="map_size", ax=ax[1])
-    ax[1].set(ylabel="Averaged steps number")
+    r_mean, r_lb, r_ub = calc_stats(rewards.cumsum(axis=0))
+    axes[1].plot(episodes, r_mean, label="Cumulated rewards")
+    axes[1].fill_between(
+        episodes, r_lb, r_ub, alpha=0.6, label=r"confidence interval: 3$\sigma$"
+    )
+    axes[1].set(ylabel="Cumulated rewards per Run")
 
-    for axi in ax:
-        axi.legend(title="map size")
     fig.tight_layout()
-    img_title = "frozenlake_steps_and_rewards.png"
-    fig.savefig(savefig_folder / img_title, bbox_inches="tight")
+    if savefig_folder:
+        img_title = "frozenlake_steps_and_rewards.png"
+        fig.savefig(savefig_folder / img_title, bbox_inches="tight")
     if show:
         plt.show()
+    return fig

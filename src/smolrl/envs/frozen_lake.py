@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 import pygame
-from gymnasium.envs.toy_text.frozen_lake import generate_random_map
+from gymnasium.envs.toy_text.frozen_lake import FrozenLakeEnv, generate_random_map
 from pygame.event import Event
 from pygame.locals import K_DOWN, K_LEFT, K_RIGHT, K_UP, KEYDOWN
 
@@ -16,6 +16,7 @@ __all__ = [
     "FROZEN_LAKE_V1",
     "ACTION_LABELS",
     "FrozenLakeParams",
+    "FrozenLakeEnv",
 ]
 
 FROZEN_LAKE_V1 = "FrozenLake-v1"
@@ -36,6 +37,8 @@ class FrozenLakeParams:
     """Probability that a tile is frozen"""
     render_mode: Literal["human", "rgb_array"]
     "Render mode"
+    seed: int | None
+    """Random seed"""
 
 
 def _get_action_from(event: Event) -> int | None:

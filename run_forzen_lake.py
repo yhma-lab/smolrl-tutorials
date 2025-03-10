@@ -1,4 +1,5 @@
 # pyright: reportAttributeAccessIssue=false
+# mypy: disable-error-code="attr-defined"
 from __future__ import annotations
 
 import time
@@ -21,7 +22,7 @@ from smolrl.envs.frozen_lake import (
     generate_random_map,
     wait_human_input,
 )
-from smolrl.vis import plot_q_values_map, plot_states_actions_distribution
+from smolrl.vis import plot_q_table_map, plot_steps_and_rewards
 
 console = Console()
 
@@ -41,7 +42,9 @@ def init_env(params: FrozenLakeParams):
         FROZEN_LAKE_V1,
         is_slippery=params.is_slippery,
         render_mode=params.render_mode,
-        desc=generate_random_map(size=params.map_size, p=params.proba_frozen),
+        desc=generate_random_map(
+            size=params.map_size, p=params.proba_frozen, seed=params.seed
+        ),
     )
 
     action_size = env.action_space.n
@@ -53,13 +56,16 @@ def init_env(params: FrozenLakeParams):
     return env
 
 
-def run_experiments(env: gym.Env, params: TrainParams):
+def run_experiments(env: gym.Env, params: TrainParams, vis: bool = False):
     action_size = env.action_space.n
     state_size = env.observation_space.n
-    rewards = np.zeros((params.total_episodes, params.n_runs))
-    steps = np.zeros((params.total_episodes, params.n_runs))
+    render_mode = env.render_mode
+
+    rewards = np.zeros((params.n_runs, params.total_episodes))
+    steps = np.zeros((params.n_runs, params.total_episodes))
     episodes = np.arange(params.total_episodes)
     qtables = np.zeros((params.n_runs, state_size, action_size))
+
     all_states = []
     all_actions = []
 
@@ -67,14 +73,19 @@ def run_experiments(env: gym.Env, params: TrainParams):
         learning_rate=params.learning_rate,
         gamma=params.gamma,
         epsilon=params.epsilon,
-        state_size=state_size,
-        action_size=action_size,
+        obs_space=env.observation_space,
+        action_space=env.action_space,
     )
     console.print("Agent initialized ...")
 
-    for run in range(params.n_runs):  # Run several times to account for stochasticity
-        agent.reset_learner()
+    # if vis:
+    #     fig, axes = plt.subplots(2, 1, figsize=(12, 6))
 
+    for run in range(params.n_runs):  # Run several times to account for stochasticity
+        console.print(f"Start to run {run + 1}/{params.n_runs}...")
+        agent.reset()
+
+        tic = time.monotonic()
         for episode in tqdm(
             episodes, desc=f"Run {run}/{params.n_runs} - Episodes", leave=False
         ):
@@ -86,7 +97,7 @@ def run_experiments(env: gym.Env, params: TrainParams):
 
             # training
             while not done:
-                action = agent.choose_action(action_space=env.action_space, state=state)
+                action = agent.choose_action(state=state)
 
                 # Log all states and actions
                 all_states.append(state)
@@ -97,11 +108,11 @@ def run_experiments(env: gym.Env, params: TrainParams):
                 agent.update(state, action, reward, new_state)
 
                 done = terminated or truncated
-                total_rewards += reward  # pyright: ignore[reportOperatorIssue]
+                total_rewards += reward  # type: ignore
                 step += 1
 
                 if done:
-                    if params.render_mode == "human":
+                    if render_mode == "human":
                         if reward > 0:  # pyright: ignore[reportOperatorIssue]
                             console.print(
                                 "Agent reached the goal! Restarting ...", style="green"
@@ -113,22 +124,21 @@ def run_experiments(env: gym.Env, params: TrainParams):
                 else:
                     state = new_state
 
-            # console.print(
-            #     f"Finish {run}/{params.n_runs} - Episode {episode}/{params.total_episodes}"
-            # )
+            rewards[run, episode] = total_rewards
+            steps[run, episode] = step
 
-            # Log all rewards and steps
-            rewards[episode, run] = total_rewards
-            steps[episode, run] = step
+        toc = time.monotonic()
+        qtables[run, :, :] = agent.learner.get_q_func()
+        console.print(
+            f"Finish to run {run + 1}/{params.n_runs}\n"
+            f"  total {params.total_episodes} episodes\n"
+            f"  total steps: {steps[:, run].sum()}\n"
+            f"  total rewards: {rewards[:, run].sum()}\n"
+            f"  time: {toc - tic:.2f} seconds"
+        )
 
-            # console.print(
-            #     f"Episode: {episode} - Total reward: {total_rewards} - Steps: {step}"
-            # )
-
-        qtables[run, :, :] = agent.get_qtable()
-        # console.print("Q-table", agent.get_qtable())
-
-    return rewards, steps, episodes, qtables, all_states, all_actions
+    lastframe = env.render()
+    return rewards, steps, episodes, qtables, all_states, all_actions, lastframe
 
 
 def main(
@@ -138,18 +148,23 @@ def main(
     render_mode: RenderEnum = typer.Option(  # type: ignore[assignment]
         RenderEnum.human, help="Render mode: `human`, `rgb_array`"
     ),
+    vis: bool = typer.Option(True, help="Visualize the training process"),
     expname: str | None = None,
 ):
     exp_dirname = expname or int(time.monotonic())
     env_params = FrozenLakeParams(
-        map_size=5, is_slippery=False, render_mode=render_mode.value, proba_frozen=0.9
+        map_size=5,
+        is_slippery=False,
+        proba_frozen=0.85,
+        render_mode=render_mode.value,
+        seed=123,
     )
     train_params = TrainParams(
         total_episodes=2000,
         learning_rate=0.8,
         gamma=0.95,
         epsilon=0.1,
-        n_runs=20,
+        n_runs=10,
         savefig_folder=Path(f"./run/{exp_dirname}"),
     )
     env = init_env(env_params)
@@ -163,28 +178,29 @@ def main(
         env.close()
         return
 
-    train_params.savefig_folder.mkdir(parents=True, exist_ok=True)
-    rewards, steps, episodes, qtables, all_states, all_actions = run_experiments(
-        env, train_params
+    # fmt: off
+    rewards, steps, episodes, qtables, all_states, all_actions, last_frame = run_experiments(
+        env=env,
+        params=train_params,
+        vis=vis,
     )
+    # fmt: on
     env.close()
 
-    # Save the results in dataframes and plot them
-    # res, st = postprocess(episodes, params, rewards, steps, params.map_size)
     qtable = qtables.mean(axis=0)  # Average the Q-table between runs
 
-    plot_states_actions_distribution(
-        states=all_states,
-        actions=all_actions,
-        map_size=env_params.map_size,
-        labels=ACTION_LABELS,
-        savefig_folder=train_params.savefig_folder,
+    # train_params.savefig_folder.mkdir(parents=True, exist_ok=True)
+    plot_steps_and_rewards(
+        rewards=rewards,
+        steps=steps,
+        # savefig_folder=train_params.savefig_folder,
         show=False,
     )
-    plot_q_values_map(
+    plot_q_table_map(
+        last_frame=last_frame,
         qtable=qtable,
         map_size=env_params.map_size,
-        savefig_folder=train_params.savefig_folder,
+        # savefig_folder=train_params.savefig_folder,
         show=False,
     )
     plt.show()
