@@ -30,6 +30,9 @@ class FlappyBirdSimpleEnv(Env[ObsType, ActType]):
 
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": FPS}
 
+    action_space: spaces.Discrete
+    observation_space: spaces.Box
+
     def __init__(
         self,
         pipe_gap: int = 100,
@@ -62,7 +65,7 @@ class FlappyBirdSimpleEnv(Env[ObsType, ActType]):
 
         self.render_mode = render_mode
         self.action_space = spaces.Discrete(2)  # type: ignore
-        self.observation_space = spaces.Box(-h, h, shape=(2,), dtype=np.float64)
+        self.observation_space = spaces.Box(-h, h, shape=(2,), dtype=np.float64)  # type: ignore
 
     def _get_observation(self):
         pipes = self._game.pipes

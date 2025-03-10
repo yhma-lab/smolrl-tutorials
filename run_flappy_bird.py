@@ -20,6 +20,7 @@ from smolrl.envs import PlayEnum, RenderEnum, human_play
 from smolrl.envs.flappy_bird import (
     ACTION_LABELS,
     FLAPPY_BIRD_SIMPLE_V1,
+    FlappyBirdSimpleEnv,
     FlappyBirdSimpleParams,
     wait_human_input,
 )
@@ -37,15 +38,15 @@ class TraningParams:
     savefig_folder: Path  # Root folder where plots are saved
 
 
-def init_env(params: FlappyBirdSimpleParams):
+def init_env(params: FlappyBirdSimpleParams) -> FlappyBirdSimpleEnv:
     env = gym.make(FLAPPY_BIRD_SIMPLE_V1, **asdict(params))
     action_size = env.action_space.n
     console.print("Environment initialized ...")
     console.print(f"Action size: {action_size}")
-    return env
+    return env  # type: ignore
 
 
-def run_experiments(env: gym.Env, params: TraningParams):
+def run_experiments(env: FlappyBirdSimpleEnv, params: TraningParams):
     rewards = np.zeros((params.total_episodes, params.n_runs))
     steps = np.zeros((params.total_episodes, params.n_runs))
     episodes = np.arange(params.total_episodes)
@@ -53,19 +54,17 @@ def run_experiments(env: gym.Env, params: TraningParams):
     all_states = []
     all_actions = []
 
-    # if run_mode == "agent":
-    #     agent = QLearningAgent(
-    #         learning_rate=params.learning_rate,
-    #         gamma=params.gamma,
-    #         epsilon=params.epsilon,
-    #         state_size=state_size,
-    #         action_size=action_size,
-    #     )
-    #     console.print("Agent initialized ...")
+    agent = QLearningAgent(
+        learning_rate=params.learning_rate,
+        gamma=params.gamma,
+        epsilon=params.epsilon,
+        state_space=env.observation_space,
+        action_space=env.action_space,
+    )
+    console.print("Agent initialized ...")
 
     for run in range(params.n_runs):  # Run several times to account for stochasticity
-        # if run_mode == "agent":
-        #     agent.reset_learner()
+        agent.reset()
 
         for episode in tqdm(
             episodes, desc=f"Run {run}/{params.n_runs} - Episodes", leave=False
@@ -78,10 +77,8 @@ def run_experiments(env: gym.Env, params: TraningParams):
 
             # training
             while not done:
-                action = env.action_space.sample()
-                # action = agent.choose_action(
-                #     action_space=env.action_space, state=state
-                # )
+                # action = env.action_space.sample()
+                action = agent.choose_action(state)
 
                 # Log all states and actions
                 all_states.append(state)
@@ -90,8 +87,7 @@ def run_experiments(env: gym.Env, params: TraningParams):
                 # Take the action (a) and observe the outcome state(s') and reward (r)
                 new_state, reward, terminated, truncated, info = env.step(action)
 
-                # if run_mode == "agent":
-                #     agent.update(state, action, reward, new_state)
+                agent.update(state, action, reward, new_state)
 
                 done = terminated or truncated
                 total_rewards += reward  # pyright: ignore[reportOperatorIssue]
@@ -105,11 +101,6 @@ def run_experiments(env: gym.Env, params: TraningParams):
             # Log all rewards and steps
             rewards[episode, run] = total_rewards
             steps[episode, run] = step
-
-        # if run_mode == "agent":
-        #     qtables[run, :, :] = agent.get_qtable()
-
-        #     # console.print("Q-table", agent.get_qtable())
 
     return rewards, steps, episodes, qtables, all_states, all_actions
 
