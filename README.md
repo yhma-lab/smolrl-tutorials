@@ -2,11 +2,11 @@
 
 An example also as tutorials for playing Flappy Bird by Deep Q-Network.
 
-<img src="./images/flappy_bird_demp.gif" width="250">
+<!-- <img src="./images/flappy_bird_demp.gif" width="250"> -->
 
 ## Setup
 
-Check [installation.md](./docs/installation.md) for instructions.
+Check [installation.md](./wiki/installation.md) for instructions.
 
 ## Disclaimer
 
@@ -29,6 +29,7 @@ This work is highly based on the following repos:
 - [ShangtongZhang/reinforcement-learning-an-introduction](https://github.com/ShangtongZhang/reinforcement-learning-an-introduction): Python Implementation of Reinforcement Learning: An Introduction
 - [flax example: Proximal Policy Optimization](https://github.com/google/flax/tree/main/examples/ppo)
 - [[RL] Q learning 與 Deep Q Network(DQN)](https://hackmd.io/@YungHuiHsu/BJgnMHbUH6)
+- https://flaneur2020.github.io/posts/2025-02-25-policy-gradient/
 
 ## References
 
