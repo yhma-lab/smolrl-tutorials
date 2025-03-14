@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -99,6 +100,7 @@ def plot_steps_and_rewards(
         episodes, s_lb, s_ub, alpha=0.6, label=r"confidence interval: 3$\sigma$"
     )
     axes[0].set(ylabel="Averaged steps number per Run")
+    axes[0].legend()
 
     r_mean, r_lb, r_ub = calc_minmax_bounds(rewards.cumsum(axis=0))
     axes[1].plot(episodes, r_mean, label="Cumulated rewards")
@@ -106,10 +108,44 @@ def plot_steps_and_rewards(
         episodes, r_lb, r_ub, alpha=0.6, label=r"confidence interval: 3$\sigma$"
     )
     axes[1].set(ylabel="Cumulated rewards per Run", xlabel="Episodes")
+    axes[1].legend()
 
     fig.tight_layout()
     if savefig_folder:
         img_title = "frozenlake_steps_and_rewards.png"
+        fig.savefig(savefig_folder / img_title, bbox_inches="tight")
+    if show:
+        plt.show()
+    return fig
+
+
+def plot_steps_and_rewards_for_all_exps(
+    map_sizes: Iterable[int],
+    episodes: npt.NDArray[np.int64],
+    all_rewards: Iterable[npt.NDArray[np.float64]],
+    all_steps: Iterable[npt.NDArray[np.float64]],
+    savefig_folder: Path | None = None,
+    show: bool = True,
+):
+    """Plot the steps and rewards from dataframes."""
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(12, 6))
+
+    for ms, rewards, steps in zip(map_sizes, all_rewards, all_steps):
+        s_mean, s_lb, s_ub = calc_minmax_bounds(steps)
+        axes[0].plot(episodes, s_mean, label=f"map size: {ms}x{ms}")
+        axes[0].fill_between(episodes, s_lb, s_ub, alpha=0.6)
+        axes[0].set(ylabel="Averaged steps number per Run")
+        axes[0].legend()
+
+        r_mean, r_lb, r_ub = calc_minmax_bounds(rewards.cumsum(axis=0))
+        axes[1].plot(episodes, r_mean, label=f"map size: {ms}x{ms}")
+        axes[1].fill_between(episodes, r_lb, r_ub, alpha=0.6)
+        axes[1].set(ylabel="Cumulated rewards per Run", xlabel="Episodes")
+        axes[1].legend()
+
+    fig.tight_layout()
+    if savefig_folder:
+        img_title = "frozenlake_steps_and_rewards_different_map_sizes.png"
         fig.savefig(savefig_folder / img_title, bbox_inches="tight")
     if show:
         plt.show()

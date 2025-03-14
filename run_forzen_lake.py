@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 import gymnasium as gym
@@ -16,13 +17,16 @@ from tqdm import tqdm
 from smolrl.agents import QLearningAgent
 from smolrl.envs import PlayEnum, RenderEnum, human_play
 from smolrl.envs.frozen_lake import (
-    ACTION_LABELS,
     FROZEN_LAKE_V1,
     FrozenLakeParams,
     generate_random_map,
     wait_human_input,
 )
-from smolrl.vis import plot_q_table_map, plot_steps_and_rewards
+from smolrl.vis import (
+    plot_q_table_map,
+    plot_steps_and_rewards,
+    plot_steps_and_rewards_for_all_exps,
+)
 
 console = Console()
 
@@ -134,13 +138,12 @@ def run_experiments(env: gym.Env, params: TrainParams, vis: bool = False):
                 total_rewards += reward  # type: ignore
                 step += 1
 
-                if (
-                    render_mode == "rgb_array"
-                    and vis
-                    and episode != 0
-                    and episode % 10 == 0
-                ):
+                if render_mode == "rgb_array" and vis and step % 10 == 0:
                     episode_frame_before_done = env.render()
+                    frame.set_data(episode_frame_before_done)  # type: ignore
+                    fig_frame.canvas.draw()
+                    fig_frame.canvas.flush_events()
+
                 if done:
                     if render_mode == "human":
                         if reward > 0:  # pyright: ignore[reportOperatorIssue]
@@ -175,10 +178,6 @@ def run_experiments(env: gym.Env, params: TrainParams, vis: bool = False):
                 fig.canvas.draw()
                 fig.canvas.flush_events()
 
-                frame.set_data(episode_frame_before_done)  # type: ignore
-                fig_frame.canvas.draw()
-                fig_frame.canvas.flush_events()
-
         toc = time.monotonic()
         qtables[run, :, :] = agent.learner.get_q_func()
         console.print(
@@ -190,7 +189,7 @@ def run_experiments(env: gym.Env, params: TrainParams, vis: bool = False):
         )
 
     lastframe = env.render()
-    return rewards, steps, episodes, qtables, all_states, all_actions, lastframe
+    return rewards, steps, episodes, qtables, lastframe
 
 
 def main(
@@ -203,9 +202,9 @@ def main(
     vis: bool = typer.Option(False, help="Visualize the training process"),
     expname: str | None = None,
 ):
-    exp_dirname = expname or int(time.monotonic())
+    exp_dirname = expname or date.today().isoformat()
     env_params = FrozenLakeParams(
-        map_size=11,
+        map_size=5,
         is_slippery=False,
         proba_frozen=0.9,
         render_mode=render_mode.value,
@@ -231,7 +230,7 @@ def main(
         return
 
     # fmt: off
-    rewards, steps, episodes, qtables, all_states, all_actions, last_frame = run_experiments(
+    rewards, steps, episodes, qtables,  last_frame = run_experiments(
         env=env,
         params=train_params,
         vis=vis,
@@ -241,25 +240,56 @@ def main(
 
     qtable = qtables.mean(axis=0)  # Average the Q-table between runs
 
-    # train_params.savefig_folder.mkdir(parents=True, exist_ok=True)
+    train_params.savefig_folder.mkdir(parents=True, exist_ok=True)
     plot_steps_and_rewards(
         episodes=episodes,
         rewards=rewards,
         steps=steps,
-        # savefig_folder=train_params.savefig_folder,
+        savefig_folder=train_params.savefig_folder,
         show=False,
     )
     plot_q_table_map(
         last_frame=last_frame,
         qtable=qtable,
         map_size=env_params.map_size,
-        # savefig_folder=train_params.savefig_folder,
+        savefig_folder=train_params.savefig_folder,
         show=False,
     )
     plt.show()
 
-    # TODO: How to compare the steps and rewards in different map sizes?
-    # plot_steps_and_rewards(res_all, st_all)
+    # # TODO: How to compare the steps and rewards in different map sizes?
+    # map_sizes = [5, 9, 13]
+    # steps_per_exp = []
+    # rewards_per_exp = []
+    # for ms in map_sizes:
+    #     env_params = FrozenLakeParams(
+    #         map_size=ms,
+    #         is_slippery=False,
+    #         proba_frozen=0.9,
+    #         render_mode=render_mode.value,
+    #         seed=42,
+    #     )
+    #     env = init_env(env_params)
+
+    #     # fmt: off
+    #     rewards, steps, episodes, qtables, last_frame = run_experiments(
+    #         env=env,
+    #         params=train_params,
+    #         vis=False,
+    #     )
+    #     # fmt: on
+    #     steps_per_exp.append(steps)
+    #     rewards_per_exp.append(rewards)
+    #     env.close()
+
+    # plot_steps_and_rewards_for_all_exps(
+    #     map_sizes,
+    #     episodes,
+    #     rewards_per_exp,
+    #     steps_per_exp,
+    #     savefig_folder=train_params.savefig_folder,
+    #     show=True,
+    # )
 
 
 if __name__ == "__main__":
