@@ -224,68 +224,55 @@ def main(
         savefig_folder=Path(f"./run/{exp_dirname}"),
     )
     train_params.savefig_folder.mkdir(parents=True, exist_ok=True)
-
-    # env = init_env(env_params)
-    # if play_mode == PlayEnum.human:
-    #     if render_mode != RenderEnum.human:
-    #         raise ValueError(
-    #             "Environment must be in human render mode when `play_mode` == 'human'"
-    #         )
-    #     human_play(env, wait_human_input)
-    #     env.close()
-    #     return
-    # # fmt: off
-    # rewards, steps, episodes, qtables, last_frame = run_experiments(
-    #     env=env,
-    #     params=train_params,
-    #     vis=vis,
-    # )
-    # # fmt: on
-    # env.close()
-
-    # plot_steps_and_rewards(
-    #     episodes=episodes,
-    #     rewards=rewards,
-    #     steps=steps,
-    #     savefig_folder=train_params.savefig_folder,
-    #     show=False,
-    # )
-    # qtable = qtables.mean(axis=0)  # Average the Q-table between runs
-    # plot_q_table_map(
-    #     last_frame=last_frame,
-    #     qtable=qtable,
-    #     map_size=env_params.map_size,
-    #     savefig_folder=train_params.savefig_folder,
-    #     show=False,
-    # )
-    # plt.show()
-
-    # XXX: How to compare the steps and rewards in different map sizes?
-    map_sizes = [5, 9, 11]
-    steps_per_exp = []
-    rewards_per_exp = []
-
-    for ms in map_sizes:
-        env = init_env(replace(env_params, map_size=ms))
-        # fmt: off
-        rewards, steps, episodes, qtables, last_frame = run_experiments(
-            env=env,
-            params=train_params,
-            vis=False,
-        )
-        # fmt: on
-        steps_per_exp.append(steps)
-        rewards_per_exp.append(rewards)
-        env.close()
-
-    plot_steps_and_rewards_for_all_exps(
-        map_sizes,
-        episodes,
-        rewards_per_exp,
-        steps_per_exp,
+    plot_steps_and_rewards(
+        episodes=episodes,
+        rewards=rewards,
+        steps=steps,
         savefig_folder=train_params.savefig_folder,
-        show=True,
+        show=False,
     )
+    plot_q_table_map(
+        last_frame=last_frame,
+        qtable=qtable,
+        map_size=env_params.map_size,
+        savefig_folder=train_params.savefig_folder,
+        show=False,
+    )
+    plt.show()
+
+    # # TODO: How to compare the steps and rewards in different map sizes?
+    # map_sizes = [5, 9, 13]
+    # steps_per_exp = []
+    # rewards_per_exp = []
+    # for ms in map_sizes:
+    #     env_params = FrozenLakeParams(
+    #         map_size=ms,
+    #         is_slippery=False,
+    #         proba_frozen=0.9,
+    #         render_mode=render_mode.value,
+    #         seed=42,
+    #     )
+    #     env = init_env(env_params)
+
+    #     # fmt: off
+    #     rewards, steps, episodes, qtables, last_frame = run_experiments(
+    #         env=env,
+    #         params=train_params,
+    #         vis=False,
+    #     )
+    #     # fmt: on
+    #     steps_per_exp.append(steps)
+    #     rewards_per_exp.append(rewards)
+    #     env.close()
+
+    # plot_steps_and_rewards_for_all_exps(
+    #     map_sizes,
+    #     episodes,
+    #     rewards_per_exp,
+    #     steps_per_exp,
+    #     savefig_folder=train_params.savefig_folder,
+    #     show=True,
+    # )
 
 
 if __name__ == "__main__":
