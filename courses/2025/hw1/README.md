@@ -2,6 +2,15 @@
 
 Write a simple markdown as report, then submit your report (using your nickname as filename, e.g.: `lqhuang.md`) to `courses/2025/submissions` (assets could be saved to `courses/2025/submissions/assets`) via GitHub Pull Request.
 
+Hints for how to summit:
+
+- Fork `smolrl-tutorials` repo into your personal space
+- Clone your own `smolrl-tutorials` to local environment
+- Checkout the `main` branch into a new `whatever-name` branch
+- Do your work on the `whatever-name` branch
+- Commit and push the results to yourself repo
+- Write a pull request to let me merge your changes into `yhma-lab/smolrl-tutorials`.
+
 The report should answer the following questions
 
 1. 仔细阅读整个代码库, 找出目前已有的实现里面, 如何体现 Q learning 的 update formula。把 update formula 拆解成不同的部分, 把源代码中相应的部分粘贴过来。
