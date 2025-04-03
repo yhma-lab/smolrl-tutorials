@@ -17,11 +17,12 @@ This work is highly based on the following repos:
 3. [yanpanlau/Keras-FlappyBird](https://github.com/yanpanlau/Keras-FlappyBird): Using Keras and Deep Q-Network to Play FlappyBird
    - [Using Keras and Deep Q-Network to Play FlappyBird](https://yanpanlau.github.io/2016/07/10/FlappyBird-Keras.html)
 4. [nikitasrivatsan/DeepLearningVideoGames](https://github.com/nikitasrivatsan/DeepLearningVideoGames): Using Deep Q Networks to Learn Video Game Strategies
-5. [enhuiz/flappybird-ql](https://github.com/enhuiz/flappybird-ql): Flappy Bird Q-Learning
+5. [anthonyli358/FlapPyBird-Reinforcement-Learning](https://github.com/anthonyli358/FlapPyBird-Reinforcement-Learning): Exploration implementing reinforcement learning using Q-learning in Flappy Bird.
+6. [enhuiz/flappybird-ql](https://github.com/enhuiz/flappybird-ql): Flappy Bird Q-Learning
    - Improved: [w3ntao/q-bird](https://github.com/w3ntao/q-bird): Flappy Bird with Q-learning <https://w3ntao.github.io/q-bird/>
-6. [mldsta/mlds-2018-hw4](https://github.com/mldsta/mlds-2018-hw4): HW4 of mlds 2018 Spring
-7. [10-OASIS-01/minrl](https://github.com/10-OASIS-01/minrl): MinRL provides clean, minimal implementations of fundamental reinforcement learning algorithms in a customizable GridWorld environment. The project focuses on educational clarity and implementation simplicity while maintaining production-quality code standards.
-8. [Talendar/flappy-bird-gym](https://github.com/Talendar/flappy-bird-gym): An OpenAI Gym environment for the Flappy Bird game
+7. [mldsta/mlds-2018-hw4](https://github.com/mldsta/mlds-2018-hw4): HW4 of mlds 2018 Spring
+8. [10-OASIS-01/minrl](https://github.com/10-OASIS-01/minrl): MinRL provides clean, minimal implementations of fundamental reinforcement learning algorithms in a customizable GridWorld environment. The project focuses on educational clarity and implementation simplicity while maintaining production-quality code standards.
+9. [Talendar/flappy-bird-gym](https://github.com/Talendar/flappy-bird-gym): An OpenAI Gym environment for the Flappy Bird game
 
 ## Learning resources
 

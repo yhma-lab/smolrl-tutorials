@@ -28,12 +28,19 @@ def qtable_directions_map(qtable, map_size):
 
 
 def calc_std_bounds(
-    data: npt.NDArray[np.float64], nsigma: int = 3
+    data: npt.NDArray[np.float64],
+    nsigma: int = 3,
+    clip: tuple[float, float] | None = (-np.inf, np.inf),
 ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Calculate the mean and standard deviation boundary of the data."""
     mean = data.mean(axis=0)
     stdvar = data.std(axis=0, ddof=1)
-    return mean, mean - nsigma * stdvar, mean + nsigma * stdvar
+    if clip is None:
+        return mean, mean - nsigma * stdvar, mean + nsigma * stdvar
+    else:
+        lower = np.clip(mean - nsigma * stdvar, clip[0], clip[1])
+        upper = np.clip(mean + nsigma * stdvar, clip[0], clip[1])
+        return mean, lower, upper
 
 
 def calc_minmax_bounds(
@@ -94,7 +101,7 @@ def plot_steps_and_rewards(
     """Plot the steps and rewards from dataframes."""
     fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(12, 6))
 
-    s_mean, s_lb, s_ub = calc_minmax_bounds(steps)
+    s_mean, s_lb, s_ub = calc_std_bounds(steps, clip=(0, np.inf))
     axes[0].plot(episodes, s_mean, label="Mean steps")
     axes[0].fill_between(
         episodes, s_lb, s_ub, alpha=0.6, label=r"confidence interval: 3$\sigma$"
@@ -102,7 +109,7 @@ def plot_steps_and_rewards(
     axes[0].set(ylabel="Averaged steps number per Run")
     axes[0].legend()
 
-    r_mean, r_lb, r_ub = calc_minmax_bounds(rewards.cumsum(axis=1))
+    r_mean, r_lb, r_ub = calc_std_bounds(rewards.cumsum(axis=1), clip=(0, np.inf))
     axes[1].plot(episodes, r_mean, label="Cumulated rewards")
     axes[1].fill_between(
         episodes, r_lb, r_ub, alpha=0.6, label=r"confidence interval: 3$\sigma$"
@@ -131,13 +138,13 @@ def plot_steps_and_rewards_for_all_exps(
     fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(12, 6))
 
     for ms, rewards, steps in zip(map_sizes, all_rewards, all_steps):
-        s_mean, s_lb, s_ub = calc_minmax_bounds(steps)
+        s_mean, s_lb, s_ub = calc_std_bounds(steps, clip=(0, np.inf))
         axes[0].plot(episodes, s_mean, label=f"map size: {ms}x{ms}")
         axes[0].fill_between(episodes, s_lb, s_ub, alpha=0.6)
         axes[0].set(ylabel="Averaged steps number per Run")
         axes[0].legend()
 
-        r_mean, r_lb, r_ub = calc_minmax_bounds(rewards.cumsum(axis=1))
+        r_mean, r_lb, r_ub = calc_std_bounds(rewards.cumsum(axis=1), clip=(0, np.inf))
         axes[1].plot(episodes, r_mean, label=f"map size: {ms}x{ms}")
         axes[1].fill_between(episodes, r_lb, r_ub, alpha=0.6)
         axes[1].set(ylabel="Cumulated rewards per Run", xlabel="Episodes")
