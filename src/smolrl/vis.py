@@ -102,7 +102,7 @@ def plot_steps_and_rewards(
     axes[0].set(ylabel="Averaged steps number per Run")
     axes[0].legend()
 
-    r_mean, r_lb, r_ub = calc_minmax_bounds(rewards.cumsum(axis=0))
+    r_mean, r_lb, r_ub = calc_minmax_bounds(rewards.cumsum(axis=1))
     axes[1].plot(episodes, r_mean, label="Cumulated rewards")
     axes[1].fill_between(
         episodes, r_lb, r_ub, alpha=0.6, label=r"confidence interval: 3$\sigma$"
@@ -137,7 +137,7 @@ def plot_steps_and_rewards_for_all_exps(
         axes[0].set(ylabel="Averaged steps number per Run")
         axes[0].legend()
 
-        r_mean, r_lb, r_ub = calc_minmax_bounds(rewards.cumsum(axis=0))
+        r_mean, r_lb, r_ub = calc_minmax_bounds(rewards.cumsum(axis=1))
         axes[1].plot(episodes, r_mean, label=f"map size: {ms}x{ms}")
         axes[1].fill_between(episodes, r_lb, r_ub, alpha=0.6)
         axes[1].set(ylabel="Cumulated rewards per Run", xlabel="Episodes")

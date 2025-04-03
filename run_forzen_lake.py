@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date
 from pathlib import Path
 
 import gymnasium as gym
 import numpy as np
 import typer
+from gymnasium.wrappers import TimeLimit
 from matplotlib import pyplot as plt
 from rich.console import Console
 from tqdm import tqdm
@@ -42,13 +43,17 @@ class TrainParams:
 
 
 def init_env(params: FrozenLakeParams):
-    env = gym.make(
-        FROZEN_LAKE_V1,
-        is_slippery=params.is_slippery,
-        render_mode=params.render_mode,
-        desc=generate_random_map(
-            size=params.map_size, p=params.proba_frozen, seed=params.seed
+    env = TimeLimit(
+        gym.make(
+            FROZEN_LAKE_V1,
+            is_slippery=params.is_slippery,
+            render_mode=params.render_mode,
+            desc=generate_random_map(
+                size=params.map_size, p=params.proba_frozen, seed=params.seed
+            ),
         ),
+        # Increase predefined max episode steps (100 steps per episode)
+        max_episode_steps=3000,
     )
 
     action_size = env.action_space.n
@@ -204,7 +209,7 @@ def main(
 ):
     exp_dirname = expname or date.today().isoformat()
     env_params = FrozenLakeParams(
-        map_size=5,
+        map_size=11,
         is_slippery=False,
         proba_frozen=0.9,
         render_mode=render_mode.value,
@@ -230,15 +235,13 @@ def main(
         return
 
     # fmt: off
-    rewards, steps, episodes, qtables,  last_frame = run_experiments(
+    rewards, steps, episodes, qtables, last_frame = run_experiments(
         env=env,
         params=train_params,
         vis=vis,
     )
     # fmt: on
     env.close()
-
-    qtable = qtables.mean(axis=0)  # Average the Q-table between runs
 
     train_params.savefig_folder.mkdir(parents=True, exist_ok=True)
     plot_steps_and_rewards(
@@ -248,6 +251,7 @@ def main(
         savefig_folder=train_params.savefig_folder,
         show=False,
     )
+    qtable = qtables.mean(axis=0)  # Average the Q-table between runs
     plot_q_table_map(
         last_frame=last_frame,
         qtable=qtable,
@@ -257,19 +261,13 @@ def main(
     )
     plt.show()
 
-    # # TODO: How to compare the steps and rewards in different map sizes?
-    # map_sizes = [5, 9, 13]
+    # # XXX: How to compare the steps and rewards in different map sizes?
+    # map_sizes = [5, 9, 11]
     # steps_per_exp = []
     # rewards_per_exp = []
+
     # for ms in map_sizes:
-    #     env_params = FrozenLakeParams(
-    #         map_size=ms,
-    #         is_slippery=False,
-    #         proba_frozen=0.9,
-    #         render_mode=render_mode.value,
-    #         seed=42,
-    #     )
-    #     env = init_env(env_params)
+    #     env = init_env(replace(env_params, map_size=ms))
 
     #     # fmt: off
     #     rewards, steps, episodes, qtables, last_frame = run_experiments(
