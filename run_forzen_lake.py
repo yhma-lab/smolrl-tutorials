@@ -204,7 +204,7 @@ def main(
 ):
     exp_dirname = expname or date.today().isoformat()
     env_params = FrozenLakeParams(
-        map_size=5,
+        map_size=7,
         is_slippery=False,
         proba_frozen=0.9,
         render_mode=render_mode.value,
