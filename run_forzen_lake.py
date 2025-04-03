@@ -257,39 +257,39 @@ def main(
     )
     plt.show()
 
-    # # TODO: How to compare the steps and rewards in different map sizes?
-    # map_sizes = [5, 9, 13]
-    # steps_per_exp = []
-    # rewards_per_exp = []
-    # for ms in map_sizes:
-    #     env_params = FrozenLakeParams(
-    #         map_size=ms,
-    #         is_slippery=False,
-    #         proba_frozen=0.9,
-    #         render_mode=render_mode.value,
-    #         seed=42,
-    #     )
-    #     env = init_env(env_params)
+    # TODO: How to compare the steps and rewards in different map sizes?
+    map_sizes = [5, 9, 13]
+    steps_per_exp = []
+    rewards_per_exp = []
+    for ms in map_sizes:
+        env_params = FrozenLakeParams(
+            map_size=ms,
+            is_slippery=False,
+            proba_frozen=0.9,
+            render_mode=render_mode.value,
+            seed=42,
+        )
+        env = init_env(env_params)
 
-    #     # fmt: off
-    #     rewards, steps, episodes, qtables, last_frame = run_experiments(
-    #         env=env,
-    #         params=train_params,
-    #         vis=False,
-    #     )
-    #     # fmt: on
-    #     steps_per_exp.append(steps)
-    #     rewards_per_exp.append(rewards)
-    #     env.close()
+        # fmt: off
+        rewards, steps, episodes, qtables, last_frame = run_experiments(
+            env=env,
+            params=train_params,
+            vis=False,
+        )
+        # fmt: on
+        steps_per_exp.append(steps)
+        rewards_per_exp.append(rewards)
+        env.close()
 
-    # plot_steps_and_rewards_for_all_exps(
-    #     map_sizes,
-    #     episodes,
-    #     rewards_per_exp,
-    #     steps_per_exp,
-    #     savefig_folder=train_params.savefig_folder,
-    #     show=True,
-    # )
+    plot_steps_and_rewards_for_all_exps(
+        map_sizes,
+        episodes,
+        rewards_per_exp,
+        steps_per_exp,
+        savefig_folder=train_params.savefig_folder,
+        show=True,
+    )
 
 
 if __name__ == "__main__":
