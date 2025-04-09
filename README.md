@@ -23,6 +23,7 @@ This work is highly based on the following repos:
 7. [mldsta/mlds-2018-hw4](https://github.com/mldsta/mlds-2018-hw4): HW4 of mlds 2018 Spring
 8. [10-OASIS-01/minrl](https://github.com/10-OASIS-01/minrl): MinRL provides clean, minimal implementations of fundamental reinforcement learning algorithms in a customizable GridWorld environment. The project focuses on educational clarity and implementation simplicity while maintaining production-quality code standards.
 9. [Talendar/flappy-bird-gym](https://github.com/Talendar/flappy-bird-gym): An OpenAI Gym environment for the Flappy Bird game
+10. [FareedKhan-dev/all-rl-algorithms](https://github.com/FareedKhan-dev/all-rl-algorithms): Implementation of all RL algorithms in a simpler way
 
 ## Learning resources
 
