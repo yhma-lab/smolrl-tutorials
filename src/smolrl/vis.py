@@ -84,8 +84,8 @@ def plot_q_table_map(
         spine.set_color("black")
 
     if savefig_folder:
-        img_title = f"frozenlake_q_values_{map_size}x{map_size}.png"
-        fig.savefig(savefig_folder / img_title, bbox_inches="tight")
+        img_title = f"frozenlake_q_values_{map_size}x{map_size}.svg"
+        fig.savefig(savefig_folder / img_title, bbox_inches="tight", dpi=150)
     if show:
         plt.show()
     return fig
@@ -119,8 +119,8 @@ def plot_steps_and_rewards(
 
     fig.tight_layout()
     if savefig_folder:
-        img_title = "frozenlake_steps_and_rewards.png"
-        fig.savefig(savefig_folder / img_title, bbox_inches="tight")
+        img_title = "frozenlake_steps_and_rewards.svg"
+        fig.savefig(savefig_folder / img_title, bbox_inches="tight", dpi=150)
     if show:
         plt.show()
     return fig
@@ -152,8 +152,8 @@ def plot_steps_and_rewards_for_all_exps(
 
     fig.tight_layout()
     if savefig_folder:
-        img_title = "frozenlake_steps_and_rewards_different_map_sizes.png"
-        fig.savefig(savefig_folder / img_title, bbox_inches="tight")
+        img_title = "frozenlake_steps_and_rewards_different_map_sizes.svg"
+        fig.savefig(savefig_folder / img_title, bbox_inches="tight", dpi=150)
     if show:
         plt.show()
     return fig
