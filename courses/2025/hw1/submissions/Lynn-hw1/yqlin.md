@@ -48,3 +48,17 @@ $$
 要不就是解很奇怪
 ![alt text](Figure_1map13.png)
 ![alt text](Figure_2map13.png)
+
+## 4/23新做的一点点
+`is_slippery=false`
+
+![alt text](Figure_0423.png)
+
+`is_slippery=true`
+![alt text](Figure_isslippery_true.png)
+
+`is_slippery=true proba_frozen=0.5`
+![alt text](Figure_proba_frozen_0.5.png)
+
+`is_slippery=false proba_frozen=0.5 epsilon=0.5`
+![alt text](Figure_epsilon_0.5.png)
