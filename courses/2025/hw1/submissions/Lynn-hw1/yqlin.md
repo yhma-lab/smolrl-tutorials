@@ -21,44 +21,31 @@ $$
 `self.qfunc.max_q_prime(new_state)`
 - Q值更新
 `q_update = self.qfunc.get_q_value(state, action) + self.learning_rate * delta`
-2. 运行
->total 2000 episodes
-  total steps: 61.0
-  total rewards: 0.0
-  time: 23.75 seconds
 
-![alt text](image.png)
-![alt text](Figure_1.png)
 
-![alt text](Figure_2.png)
 
-3. 比较不同 map size 下 (5, 7, 9, 13)
-**map size=7**
-![alt text](Figure_1map7.png)
-![alt text](Figure_2map7.png)
-
-**map size=9**
-![alt text](Figure_1map9.png)
-![alt text](Figure_2map9.png)
-
-**map size=13**
-要么找不到解，
-![alt text](Figure_2map13(2).png)
-![alt text](Figure_1map13(2).png)
-要不就是解很奇怪
-![alt text](Figure_1map13.png)
-![alt text](Figure_2map13.png)
-
-## 4/23新做的一点点
+## 4/23新做的
 `is_slippery=false`
 
-![alt text](Figure_0423.png)
+![alt text](img/Figure_0423.png)
 
 `is_slippery=true`
-![alt text](Figure_isslippery_true.png)
+![alt text](img/Figure_isslippery_true.png)
 
 `is_slippery=true proba_frozen=0.5`
-![alt text](Figure_proba_frozen_0.5.png)
+![alt text](img/Figure_proba_frozen_0.5.png)
 
 `is_slippery=false proba_frozen=0.5 epsilon=0.5`
-![alt text](Figure_epsilon_0.5.png)
+![alt text](img/Figure_epsilon_0.5.png)
+
+**map size=11**
+![alt text](img/mapsize=11.png)
+![alt text](img/mapsize=11_2.png)
+
+**map size=5**
+![alt text](img/mapsize=5.png)
+![alt text](img/mapsize=5_2.png)
+
+**map size=9**
+![alt text](img/mapsize=9.png)
+![alt text](img/mapsize=9_2.png)
