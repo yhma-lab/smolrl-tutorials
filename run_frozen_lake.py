@@ -224,49 +224,36 @@ def main(
         savefig_folder=Path(f"./run/{exp_dirname}"),
     )
     train_params.savefig_folder.mkdir(parents=True, exist_ok=True)
+    plot_steps_and_rewards(
+        episodes=episodes,
+        rewards=rewards,
+        steps=steps,
+        savefig_folder=train_params.savefig_folder,
+        show=False,
+    )
+    plot_q_table_map(
+        last_frame=last_frame,
+        qtable=qtable,
+        map_size=env_params.map_size,
+        savefig_folder=train_params.savefig_folder,
+        show=False,
+    )
+    plt.show()
 
-    # env = init_env(env_params)
-    # if play_mode == PlayEnum.human:
-    #     if render_mode != RenderEnum.human:
-    #         raise ValueError(
-    #             "Environment must be in human render mode when `play_mode` == 'human'"
-    #         )
-    #     human_play(env, wait_human_input)
-    #     env.close()
-    #     return
-    # # fmt: off
-    # rewards, steps, episodes, qtables, last_frame = run_experiments(
-    #     env=env,
-    #     params=train_params,
-    #     vis=vis,
-    # )
-    # # fmt: on
-    # env.close()
-
-    # plot_steps_and_rewards(
-    #     episodes=episodes,
-    #     rewards=rewards,
-    #     steps=steps,
-    #     savefig_folder=train_params.savefig_folder,
-    #     show=False,
-    # )
-    # qtable = qtables.mean(axis=0)  # Average the Q-table between runs
-    # plot_q_table_map(
-    #     last_frame=last_frame,
-    #     qtable=qtable,
-    #     map_size=env_params.map_size,
-    #     savefig_folder=train_params.savefig_folder,
-    #     show=False,
-    # )
-    # plt.show()
-
-    # XXX: How to compare the steps and rewards in different map sizes?
-    map_sizes = [5, 9, 11]
+    # TODO: How to compare the steps and rewards in different map sizes?
+    map_sizes = [5, 9, 13]
     steps_per_exp = []
     rewards_per_exp = []
-
     for ms in map_sizes:
-        env = init_env(replace(env_params, map_size=ms))
+        env_params = FrozenLakeParams(
+            map_size=ms,
+            is_slippery=False,
+            proba_frozen=0.9,
+            render_mode=render_mode.value,
+            seed=42,
+        )
+        env = init_env(env_params)
+
         # fmt: off
         rewards, steps, episodes, qtables, last_frame = run_experiments(
             env=env,
