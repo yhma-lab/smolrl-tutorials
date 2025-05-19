@@ -219,7 +219,7 @@ def main(
         total_episodes=2000,
         learning_rate=0.8,
         gamma=0.95,
-        epsilon=0.1,
+        epsilon=0.5,
         n_runs=20,
         savefig_folder=Path(f"./run/{exp_dirname}"),
     )
